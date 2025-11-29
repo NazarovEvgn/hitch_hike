@@ -2,6 +2,26 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Current Project Status
+
+**✅ Phase 1 Complete**: Backend infrastructure is implemented and database is ready.
+
+**What's implemented:**
+- ✅ FastAPI backend with uv package manager
+- ✅ PostgreSQL database with all tables created
+- ✅ SQLAlchemy 2.0 async models
+- ✅ JWT authentication (client and business admin)
+- ✅ Pydantic validation schemas
+- ✅ Auth API endpoints (register/login)
+- ✅ Docker Compose setup
+- ✅ Database migrations (manual)
+- ✅ Redis integration prepared
+
+**Next steps (Phase 2):**
+- Admin Panel - status updates and booking management
+- Client App - map view and booking functionality
+- WebSocket for real-time updates
+
 ## Project Overview
 
 **ХичХайк** (HitchHike) - Real-Time Service Availability Platform for auto service businesses (car washes, repair shops, tire services) integrated with 2GIS maps.
@@ -156,18 +176,38 @@ For clients (NO registration required):
 ```bash
 # Setup
 cd backend
-uv venv && source .venv/bin/activate  # or .venv\Scripts\activate on Windows
-uv pip install -r requirements.txt
+uv venv && .venv\Scripts\activate  # Windows
+uv pip install -e .
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your settings (especially SECRET_KEY and DGIS_API_KEY)
+
+# Database (using Docker)
+cd ..
+docker-compose up -d  # Start PostgreSQL and Redis
 
 # Development
-uvicorn main:app --reload              # Run dev server
-alembic upgrade head                   # Run migrations
-pytest                                 # Run tests
+cd backend
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000  # Run dev server
+
+# Database migrations (if needed)
+# Note: Manual migration already applied. For new migrations:
+alembic revision --autogenerate -m "description"
+alembic upgrade head
+
+# Testing
+pytest  # Run tests (when implemented)
 
 # Code quality
-ruff check .                           # Lint
-black .                                # Format
+ruff check .   # Lint
+black .        # Format
 ```
+
+**Important Notes:**
+- Database schema is already created via manual migration in `alembic/versions/20251129_1220_initial_migration.py`
+- If you encounter asyncpg connection issues on Windows, the database can be managed directly via Docker exec
+- API documentation available at: http://localhost:8000/docs
 
 ### Frontend (Quasar)
 ```bash
@@ -249,13 +289,32 @@ See **docs/dev_plan.md** for detailed technical stack, architecture, and develop
 
 ## Environment Variables
 
-Backend requires `.env` file:
+Backend requires `.env` file (created from `.env.example`):
 ```bash
-DATABASE_URL=postgresql+asyncpg://user:pass@localhost/hitchhike_db
-REDIS_URL=redis://localhost:6379
-SECRET_KEY=your-secret-key
-DGIS_API_KEY=your-2gis-api-key
+# Database (use 127.0.0.1 instead of localhost on Windows)
+DATABASE_URL=postgresql+asyncpg://hitchhike:hitchhike@127.0.0.1:5432/hitchhike_db
+
+# Redis
+REDIS_URL=redis://localhost:6379/0
+
+# JWT - IMPORTANT: Generate a secure key!
+# Use: python -c "import secrets; print(secrets.token_urlsafe(32))"
+SECRET_KEY=your-generated-secure-key-here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+REFRESH_TOKEN_EXPIRE_DAYS=7
+
+# 2GIS API
+DGIS_API_KEY=your-2gis-api-key-here
+
+# CORS
+ALLOWED_ORIGINS=http://localhost:9000,http://localhost:9001,http://localhost:3000
+
+# Environment
+ENVIRONMENT=development
 ```
+
+**Security Note**: Never commit `.env` file to Git. Always generate a new SECRET_KEY for production.
 
 ## Language Notes
 
