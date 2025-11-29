@@ -5,22 +5,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Current Project Status
 
 **✅ Phase 1 Complete**: Backend infrastructure is implemented and database is ready.
+**✅ Phase 2 Complete**: Full REST API with all admin and client endpoints implemented.
 
 **What's implemented:**
 - ✅ FastAPI backend with uv package manager
-- ✅ PostgreSQL database with all tables created
-- ✅ SQLAlchemy 2.0 async models
-- ✅ JWT authentication (client and business admin)
+- ✅ PostgreSQL database with all tables created (Docker port: 5433)
+- ✅ SQLAlchemy 2.0 async models with proper Enum handling
+- ✅ JWT authentication (argon2 password hashing)
 - ✅ Pydantic validation schemas
-- ✅ Auth API endpoints (register/login)
-- ✅ Docker Compose setup
-- ✅ Database migrations (manual)
+- ✅ Auth API endpoints (register/login for clients and business admins)
+- ✅ Admin API endpoints (35+ endpoints - profile, services, bookings, analytics, status updates)
+- ✅ Client API endpoints (businesses browsing, bookings, favorites)
+- ✅ Docker Compose setup (PostgreSQL on port 5433, Redis on 6379)
+- ✅ Database migrations with proper Enum values
 - ✅ Redis integration prepared
+- ✅ API documentation (see docs/api_endpoints.md)
 
-**Next steps (Phase 2):**
-- Admin Panel - status updates and booking management
-- Client App - map view and booking functionality
-- WebSocket for real-time updates
+**Known Issues & Solutions:**
+- ⚠️ **PostgreSQL Port Conflict**: If you have local PostgreSQL 17 installed, Docker uses port 5433 instead of 5432
+- ✅ **Fixed**: Enum values now use lowercase (car_wash, not CAR_WASH) via `values_callable`
+- ✅ **Fixed**: Password hashing switched from bcrypt to argon2-cffi for better compatibility
+
+**Next steps (Phase 3):**
+- Setup Quasar Admin Panel project
+- Implement admin dashboard UI
+- WebSocket for real-time updates (deferred from Phase 2)
 
 ## Project Overview
 
@@ -285,14 +294,15 @@ See **docs/dev_plan.md** for detailed technical stack, architecture, and develop
 **Authentication:**
 - JWT tokens (access + refresh)
 - Separate auth flows for clients and business admins
-- Password hashing with bcrypt
+- Password hashing with argon2 (more secure and compatible than bcrypt)
 
 ## Environment Variables
 
 Backend requires `.env` file (created from `.env.example`):
 ```bash
 # Database (use 127.0.0.1 instead of localhost on Windows)
-DATABASE_URL=postgresql+asyncpg://hitchhike:hitchhike@127.0.0.1:5432/hitchhike_db
+# Note: Docker PostgreSQL runs on port 5433 to avoid conflict with local PostgreSQL 17
+DATABASE_URL=postgresql+asyncpg://hitchhike:hitchhike@127.0.0.1:5433/hitchhike_db
 
 # Redis
 REDIS_URL=redis://localhost:6379/0
