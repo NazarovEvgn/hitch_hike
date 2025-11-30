@@ -161,10 +161,11 @@
               mask="+7 (###) ###-##-##"
               fill-mask
               unmasked-value
-              hint="Мы отправим вам SMS с подтверждением"
+              placeholder="+7 (912) 991-27-81"
+              hint="Введите 10 цифр номера после +7"
               :rules="[
                 val => !!val || 'Введите номер телефона',
-                val => val.length === 11 || 'Введите корректный номер'
+                val => val.length === 10 || 'Введите корректный номер (10 цифр)'
               ]"
             />
 
@@ -183,7 +184,7 @@
                 type="submit"
                 color="primary"
                 label="Далее"
-                :disable="!clientName || !clientPhone || clientPhone.length !== 11"
+                :disable="!clientName || !clientPhone || clientPhone.length !== 10"
                 unelevated
               />
             </q-stepper-navigation>
