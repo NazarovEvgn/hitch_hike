@@ -32,7 +32,7 @@ module.exports = configure(function (ctx) {
 
       env: {
         API_URL: process.env.API_URL || 'http://127.0.0.1:8000/api/v1',
-        DGIS_API_KEY: process.env.DGIS_API_KEY || 'your-2gis-api-key-here'
+        DGIS_API_KEY: 'bc1703bf-053c-4f08-abed-a8817260c0e7'
       }
     },
 

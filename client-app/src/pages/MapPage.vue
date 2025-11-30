@@ -64,13 +64,13 @@
             <div class="q-gutter-sm">
               <div class="row items-center">
                 <q-icon name="schedule" class="q-mr-sm" />
-                <span>{{ statusLabel(selectedBusiness.status) }}</span>
+                <span>{{ statusLabel(selectedBusiness.status?.status || 'available') }}</span>
                 <q-chip
-                  :color="statusColor(selectedBusiness.status)"
+                  :color="statusColor(selectedBusiness.status?.status || 'available')"
                   text-color="white"
                   class="q-ml-sm"
                 >
-                  {{ selectedBusiness.status === 'available' ? '🟢' : selectedBusiness.status === 'busy' ? '🟡' : '🟠' }}
+                  {{ selectedBusiness.status?.status === 'available' ? '🟢' : selectedBusiness.status?.status === 'busy' ? '🟡' : '🟠' }}
                 </q-chip>
               </div>
               <div class="row items-center">
@@ -111,8 +111,9 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useQuasar } from 'quasar'
+import { api } from 'boot/axios'
 
 export default defineComponent({
   name: 'MapPage',
@@ -121,9 +122,12 @@ export default defineComponent({
     const $q = useQuasar()
     const mapContainer = ref(null)
     const map = ref(null) // Экземпляр карты 2GIS
+    const mapglAPI = ref(null) // API 2GIS MapGL
     const selectedType = ref(null)
     const selectedBusiness = ref(null)
     const favoritesCount = ref(0)
+    const businesses = ref([]) // Список бизнесов
+    const markers = ref([]) // Маркеры на карте
 
     const selectType = (type) => {
       if (selectedType.value === type) {
@@ -131,8 +135,7 @@ export default defineComponent({
       } else {
         selectedType.value = type
       }
-      // TODO: Фильтровать маркеры на карте
-      console.log('Selected type:', selectedType.value)
+      filterMarkers()
     }
 
     const businessTypeLabel = (type) => {
@@ -174,31 +177,140 @@ export default defineComponent({
       console.log('Book service at:', business.name)
     }
 
+    // Загрузка бизнесов из API
+    const loadBusinesses = async () => {
+      try {
+        const center = [65.5343, 57.1522] // Центр Тюмени
+        const response = await api.get('/businesses/nearby', {
+          params: {
+            lat: center[1], // 2GIS использует [lon, lat], а API [lat, lon]
+            lon: center[0],
+            radius_km: 20
+          }
+        })
+        businesses.value = response.data
+        console.log('Loaded businesses:', businesses.value)
+        createMarkers()
+      } catch (error) {
+        console.error('Failed to load businesses:', error)
+        $q.notify({
+          type: 'warning',
+          message: 'Не удалось загрузить сервисы. Попробуйте позже.'
+        })
+      }
+    }
+
+    // Получить цвет маркера по статусу
+    const getMarkerColor = (status) => {
+      const colors = {
+        available: '#4CAF50',   // зеленый
+        busy: '#FF9800',        // оранжевый
+        very_busy: '#F44336'    // красный
+      }
+      return colors[status] || '#9E9E9E' // серый по умолчанию
+    }
+
+    // Создание маркеров на карте
+    const createMarkers = () => {
+      if (!map.value || !mapglAPI.value) return
+
+      // Удаляем старые маркеры
+      markers.value.forEach(item => item.marker.destroy())
+      markers.value = []
+
+      // Создаем новые маркеры
+      businesses.value.forEach(business => {
+        console.log('Creating marker for:', business.name, 'at', [business.lon, business.lat], 'status:', business.status?.status)
+
+        // Создаем HTML для маркера как строку
+        const color = getMarkerColor(business.status?.status)
+        const markerHTML = `
+          <div class="custom-marker" style="
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: ${color};
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            user-select: none;
+          " data-business-id="${business.id}">👍</div>
+        `
+
+        console.log('Creating marker with color:', color, 'for status:', business.status?.status)
+
+        try {
+          const marker = new mapglAPI.value.HtmlMarker(map.value, {
+            coordinates: [business.lon, business.lat],
+            html: markerHTML
+          })
+
+          console.log('Marker created successfully')
+
+          // Сохраняем маркер с информацией о бизнесе
+          markers.value.push({
+            marker,
+            element: null, // Элемент получим через делегирование
+            business
+          })
+        } catch (error) {
+          console.error('Failed to create marker:', error)
+        }
+      })
+
+      console.log(`Created ${markers.value.length} markers`)
+    }
+
+    // Фильтрация маркеров по типу
+    const filterMarkers = () => {
+      markers.value.forEach(item => {
+        if (!selectedType.value || item.business.type === selectedType.value) {
+          item.element.style.display = 'flex'
+        } else {
+          item.element.style.display = 'none'
+        }
+      })
+    }
+
     const initMap = async () => {
       try {
         // Динамический импорт 2GIS MapGL
         const { load } = await import('@2gis/mapgl')
-        const mapglAPI = await load()
+        mapglAPI.value = await load()
+
+        // API ключ из переменных окружения
+        const apiKey = process.env.DGIS_API_KEY || 'bc1703bf-053c-4f08-abed-a8817260c0e7'
+        console.log('Using 2GIS API key:', apiKey.substring(0, 8) + '...')
 
         // Создание карты с центром на Тюмени
-        map.value = new mapglAPI.Map(mapContainer.value, {
+        map.value = new mapglAPI.value.Map(mapContainer.value, {
           center: [65.5343, 57.1522], // Координаты Тюмени [lon, lat]
           zoom: 12,
-          key: process.env.DGIS_API_KEY || 'your-2gis-api-key-here'
+          key: apiKey
         })
 
-        console.log('2GIS Map initialized successfully', map.value)
+        console.log('2GIS Map initialized successfully')
 
-        // Временная заглушка с тестовым бизнесом
-        setTimeout(() => {
-          selectedBusiness.value = {
-            name: 'Тестовая автомойка',
-            type: 'car_wash',
-            address: 'ул. Ленина, 10, Тюмень',
-            phone: '+79001234567',
-            status: 'available'
+        // Добавляем обработчик кликов на карту для делегирования событий
+        mapContainer.value.addEventListener('click', (e) => {
+          const marker = e.target.closest('.custom-marker')
+          if (marker) {
+            const businessId = parseInt(marker.dataset.businessId)
+            const business = businesses.value.find(b => b.id === businessId)
+            if (business) {
+              console.log('Marker clicked:', business.name)
+              selectedBusiness.value = business
+              map.value.setCenter([business.lon, business.lat])
+            }
           }
-        }, 2000)
+        })
+
+        // Загрузка бизнесов после инициализации карты
+        await loadBusinesses()
       } catch (error) {
         console.error('Failed to initialize 2GIS map:', error)
         $q.notify({
@@ -210,6 +322,15 @@ export default defineComponent({
 
     onMounted(() => {
       initMap()
+    })
+
+    onBeforeUnmount(() => {
+      // Очистка маркеров при размонтировании
+      markers.value.forEach(item => item.marker.destroy())
+      markers.value = []
+      if (map.value) {
+        map.value.destroy()
+      }
     })
 
     return {
