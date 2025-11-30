@@ -94,7 +94,7 @@
             <q-btn
               color="secondary"
               icon="event"
-              label="Онлайн-запись"
+              label="Онлайн-записи"
               class="full-width"
               :to="{ name: 'bookings' }"
             />

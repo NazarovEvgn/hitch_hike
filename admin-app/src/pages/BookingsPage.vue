@@ -1,12 +1,12 @@
 <template>
   <q-page padding>
-    <div class="text-h4 q-mb-md">Онлайн-запись</div>
+    <div class="text-h4 q-mb-md">Онлайн-записи</div>
 
     <!-- Фильтры -->
     <q-card class="q-mb-md">
       <q-card-section>
         <div class="row q-col-gutter-md">
-          <div class="col-12 col-md-3">
+          <div class="col-12 col-md-6">
             <q-select
               v-model="filters.status"
               :options="statusOptions"
@@ -16,25 +16,7 @@
               @update:model-value="fetchBookings"
             />
           </div>
-          <div class="col-12 col-md-3">
-            <q-input
-              v-model="filters.dateFrom"
-              label="Дата от"
-              outlined
-              type="date"
-              @update:model-value="fetchBookings"
-            />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-input
-              v-model="filters.dateTo"
-              label="Дата до"
-              outlined
-              type="date"
-              @update:model-value="fetchBookings"
-            />
-          </div>
-          <div class="col-12 col-md-3 flex items-center">
+          <div class="col-12 col-md-6 flex items-center">
             <q-btn
               color="primary"
               icon="refresh"
@@ -58,6 +40,7 @@
           flat
           bordered
           :rows-per-page-options="[10, 25, 50]"
+          :grid="$q.screen.lt.md"
         >
           <template v-slot:body-cell-booking_datetime="props">
             <q-td :props="props">
@@ -147,6 +130,90 @@
                 <q-tooltip>Отменить</q-tooltip>
               </q-btn>
             </q-td>
+          </template>
+
+          <!-- Grid mode для мобильных устройств -->
+          <template v-slot:item="props">
+            <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
+              <q-card>
+                <q-card-section>
+                  <div class="row items-center q-mb-sm">
+                    <div class="col">
+                      <div class="text-subtitle1 text-weight-medium">
+                        {{ props.row.client_name }}
+                      </div>
+                      <div class="text-caption text-grey">
+                        {{ props.row.client_phone }}
+                      </div>
+                    </div>
+                    <div class="col-auto">
+                      <q-badge :color="getStatusColor(props.row.status)">
+                        {{ getStatusLabel(props.row.status) }}
+                      </q-badge>
+                    </div>
+                  </div>
+
+                  <q-separator class="q-my-sm" />
+
+                  <div class="text-body2">
+                    <div class="row q-mb-xs">
+                      <div class="col-5 text-grey-7">Дата и время:</div>
+                      <div class="col-7">
+                        {{ formatDate(props.row.booking_date) }}
+                        <div class="text-caption">{{ props.row.booking_time }}</div>
+                      </div>
+                    </div>
+                    <div class="row q-mb-xs">
+                      <div class="col-5 text-grey-7">Услуга:</div>
+                      <div class="col-7">{{ props.row.service?.name || '-' }}</div>
+                    </div>
+                    <div v-if="props.row.notes" class="row q-mb-xs">
+                      <div class="col-5 text-grey-7">Примечания:</div>
+                      <div class="col-7 text-caption">{{ props.row.notes }}</div>
+                    </div>
+                  </div>
+                </q-card-section>
+
+                <q-separator />
+
+                <q-card-actions align="right">
+                  <q-btn
+                    flat
+                    dense
+                    icon="visibility"
+                    color="primary"
+                    label="Детали"
+                    @click="viewBookingDetails(props.row)"
+                  />
+                  <q-btn
+                    v-if="props.row.status === 'pending'"
+                    flat
+                    dense
+                    icon="check"
+                    color="positive"
+                    label="Подтвердить"
+                    @click="updateBookingStatus(props.row, 'confirmed')"
+                  />
+                  <q-btn
+                    v-if="props.row.status === 'confirmed'"
+                    flat
+                    dense
+                    icon="done_all"
+                    color="primary"
+                    label="Завершить"
+                    @click="updateBookingStatus(props.row, 'completed')"
+                  />
+                  <q-btn
+                    v-if="['pending', 'confirmed'].includes(props.row.status)"
+                    flat
+                    dense
+                    icon="close"
+                    color="negative"
+                    @click="updateBookingStatus(props.row, 'cancelled')"
+                  />
+                </q-card-actions>
+              </q-card>
+            </div>
           </template>
         </q-table>
       </q-card-section>
@@ -282,9 +349,7 @@ export default defineComponent({
     const selectedBooking = ref(null)
 
     const filters = ref({
-      status: null,
-      dateFrom: null,
-      dateTo: null
+      status: null
     })
 
     const statusOptions = [
@@ -384,8 +449,6 @@ export default defineComponent({
       try {
         const params = {}
         if (filters.value.status) params.status = filters.value.status.value || filters.value.status
-        if (filters.value.dateFrom) params.date_from = filters.value.dateFrom
-        if (filters.value.dateTo) params.date_to = filters.value.dateTo
 
         const response = await api.get('/admin/bookings', { params })
         bookings.value = response.data

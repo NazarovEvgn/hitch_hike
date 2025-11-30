@@ -285,7 +285,7 @@ async def delete_service(
 
 @router.get("/bookings", response_model=list[BookingSchema])
 async def get_bookings(
-    status_filter: str | None = None,
+    status: str | None = None,
     limit: int = 50,
     current_admin: BusinessAdmin = Depends(get_current_business_admin),
     db: AsyncSession = Depends(get_db),
@@ -293,8 +293,8 @@ async def get_bookings(
     """Get bookings for the business."""
     query = select(Booking).where(Booking.business_id == current_admin.business_id)
 
-    if status_filter:
-        query = query.where(Booking.status == BookingStatus(status_filter))
+    if status:
+        query = query.where(Booking.status == BookingStatus(status))
 
     query = query.order_by(Booking.booking_date.desc(), Booking.booking_time.desc()).limit(limit)
 

@@ -32,7 +32,7 @@
             <q-icon name="event" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Онлайн-запись</q-item-label>
+            <q-item-label>Онлайн-записи</q-item-label>
           </q-item-section>
         </q-item>
 
