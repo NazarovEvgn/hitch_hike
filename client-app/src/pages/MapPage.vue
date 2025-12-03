@@ -216,16 +216,6 @@ export default defineComponent({
       }
     }
 
-    // Получить цвет маркера по статусу
-    const getMarkerColor = (status) => {
-      const colors = {
-        available: '#4CAF50',   // зеленый
-        busy: '#FF9800',        // оранжевый
-        very_busy: '#F44336'    // красный
-      }
-      return colors[status] || '#9E9E9E' // серый по умолчанию
-    }
-
     // Создание маркеров на карте
     const createMarkers = () => {
       if (!map.value || !mapglAPI.value) return
@@ -238,15 +228,19 @@ export default defineComponent({
       businesses.value.forEach(business => {
         console.log('Creating marker for:', business.name, 'at', [business.lon, business.lat], 'status:', business.status?.status)
 
-        // Создаем HTML для маркера как строку
-        const color = getMarkerColor(business.status?.status)
+        // Брендовые цвета
+        const primaryColor = '#27126A' // Фиолетовый (основной)
+        const accentColor = '#98EA14'  // Зеленый (акцентирующий)
+        const isAvailable = business.status?.status === 'available'
+
+        // Создаем HTML для маркера с индикатором доступности
         const markerHTML = `
           <div class="custom-marker" style="
+            position: relative;
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: ${color};
-            border: 3px solid white;
+            background-color: ${primaryColor};
             box-shadow: 0 2px 8px rgba(0,0,0,0.5);
             cursor: pointer;
             display: flex;
@@ -254,10 +248,20 @@ export default defineComponent({
             justify-content: center;
             font-size: 22px;
             user-select: none;
-          " data-business-id="${business.id}"></div>
+          " data-business-id="${business.id}">
+            ${isAvailable ? `
+              <div style="
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background-color: ${accentColor};
+                box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+              "></div>
+            ` : ''}
+          </div>
         `
 
-        console.log('Creating marker with color:', color, 'for status:', business.status?.status)
+        console.log('Creating marker for:', business.name, 'available:', isAvailable)
 
         try {
           const marker = new mapglAPI.value.HtmlMarker(map.value, {

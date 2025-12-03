@@ -17,6 +17,8 @@ module.exports = configure(function (ctx) {
       'app.scss'
     ],
 
+    sassVariables: 'src/css/quasar.variables.scss',
+
     extras: [
       'roboto-font',
       'material-icons',
@@ -75,7 +77,7 @@ module.exports = configure(function (ctx) {
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',
-        theme_color: '#1976D2',
+        theme_color: '#27126A',
         icons: [
           {
             src: 'icons/icon-128x128.png',

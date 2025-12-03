@@ -12,6 +12,7 @@ class BusinessType(str, enum.Enum):
     CAR_WASH = "car_wash"
     REPAIR_SHOP = "repair_shop"
     TIRE_SERVICE = "tire_service"
+    BEAUTY_SALON = "beauty_salon"
 
 
 class SubscriptionStatus(str, enum.Enum):

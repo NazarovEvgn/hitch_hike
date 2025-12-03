@@ -17,6 +17,8 @@ module.exports = configure(function (/* ctx */) {
       'app.scss'
     ],
 
+    sassVariables: 'src/css/quasar.variables.scss',
+
     extras: [
       'roboto-font',
       'material-icons',
