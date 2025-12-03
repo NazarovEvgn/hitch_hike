@@ -11,7 +11,8 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => !!state.accessToken,
-    businessName: (state) => state.business?.name || ''
+    businessName: (state) => state.business?.name || '',
+    businessAddress: (state) => state.business?.address || ''
   },
 
   actions: {

@@ -1,11 +1,14 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <q-header elevated class="bg-dark text-white">
+    <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
 
         <q-toolbar-title>
-          {{ businessName }}
+          <div class="column">
+            <div class="text-weight-medium">{{ businessName }}</div>
+            <div class="text-caption">{{ businessAddress }}</div>
+          </div>
         </q-toolbar-title>
 
         <q-btn flat round dense icon="logout" @click="handleLogout">
@@ -14,25 +17,16 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+    <q-drawer v-model="leftDrawerOpen" bordered>
       <q-list>
-        <q-item-label header>Навигация</q-item-label>
+        <q-item-label header>Меню</q-item-label>
 
-        <q-item clickable :to="{ name: 'home' }" exact>
+        <q-item clickable :to="{ name: 'profile' }">
           <q-item-section avatar>
-            <q-icon name="dashboard" />
+            <q-icon name="account_circle" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Главная</q-item-label>
-          </q-item-section>
-        </q-item>
-
-        <q-item clickable :to="{ name: 'bookings' }">
-          <q-item-section avatar>
-            <q-icon name="event" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Онлайн-записи</q-item-label>
+            <q-item-label>Личный кабинет</q-item-label>
           </q-item-section>
         </q-item>
 
@@ -41,7 +35,7 @@
             <q-icon name="build" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Услуги</q-item-label>
+            <q-item-label>Услуги и цены</q-item-label>
           </q-item-section>
         </q-item>
 
@@ -51,17 +45,6 @@
           </q-item-section>
           <q-item-section>
             <q-item-label>Аналитика</q-item-label>
-          </q-item-section>
-        </q-item>
-
-        <q-separator />
-
-        <q-item clickable :to="{ name: 'profile' }">
-          <q-item-section avatar>
-            <q-icon name="settings" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Настройки</q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -96,6 +79,15 @@ export default defineComponent({
       }
     })
 
+    const businessAddress = computed(() => {
+      try {
+        const authStore = useAuthStore()
+        return authStore.businessAddress || ''
+      } catch (e) {
+        return ''
+      }
+    })
+
     const toggleLeftDrawer = () => {
       leftDrawerOpen.value = !leftDrawerOpen.value
     }
@@ -120,6 +112,7 @@ export default defineComponent({
     return {
       leftDrawerOpen,
       businessName,
+      businessAddress,
       toggleLeftDrawer,
       handleLogout
     }
