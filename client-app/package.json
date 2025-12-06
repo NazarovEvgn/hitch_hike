@@ -1,9 +1,9 @@
 {
-  "name": "hitchhike-client",
+  "name": "lets-client",
   "version": "0.0.1",
-  "description": "ХичХайк - Клиентское PWA приложение для поиска автосервисов",
-  "productName": "ХичХайк",
-  "author": "HitchHike Team",
+  "description": "Lets - Клиентское PWA приложение для поиска автосервисов",
+  "productName": "Lets",
+  "author": "Lets Team",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",

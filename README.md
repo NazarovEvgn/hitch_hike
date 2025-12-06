@@ -1,10 +1,10 @@
-# ХичХайк (HitchHike)
+# Lets
 
 Real-Time Service Availability Platform for auto service businesses integrated with 2GIS maps.
 
 ## 🎯 Project Overview
 
-**ХичХайк** helps clients find available auto services (car washes, repair shops, tire services) in real-time and allows online booking. Businesses can update their availability status and manage bookings through an admin panel.
+**Lets** helps clients find available auto services (car washes, repair shops, tire services) in real-time and allows online booking. Businesses can update their availability status and manage bookings through an admin panel.
 
 **Target Market:** Tyumen, Russia (MVP) → expansion to other cities
 
@@ -145,9 +145,9 @@ Full API documentation: http://localhost:8000/docs
 - 🟠 Orange = very busy (30+ min wait)
 
 **Domains:**
-- хичхайк.рф (client PWA)
-- api.хичхайк.рф (backend API)
-- admin.хичхайк.рф (admin panel)
+- lets.app (client PWA)
+- api.lets.app (backend API)
+- admin.lets.app (admin panel)
 
 ## 📝 License
 

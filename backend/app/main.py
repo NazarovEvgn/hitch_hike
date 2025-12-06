@@ -12,21 +12,21 @@ from app.api.v1 import auth
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
     # Startup
-    logger.info("Starting HitchHike API...")
+    logger.info("Starting Lets API...")
     await redis_client.connect()
     logger.info("Redis connected")
 
     yield
 
     # Shutdown
-    logger.info("Shutting down HitchHike API...")
+    logger.info("Shutting down Lets API...")
     await redis_client.disconnect()
     logger.info("Redis disconnected")
 
 
 # Create FastAPI application
 app = FastAPI(
-    title="HitchHike API",
+    title="Lets API",
     description="Real-time service availability platform for auto services",
     version="0.1.0",
     lifespan=lifespan,
@@ -55,7 +55,7 @@ app.include_router(favorites.router, prefix="/api/v1")
 async def root():
     """Root endpoint."""
     return {
-        "message": "HitchHike API",
+        "message": "Lets API",
         "version": "0.1.0",
         "docs": "/docs",
     }

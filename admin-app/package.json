@@ -1,9 +1,9 @@
 {
-  "name": "hitchhike-admin",
+  "name": "lets-admin",
   "version": "0.0.1",
-  "description": "ХичХайк - Админ панель для управления автосервисами",
-  "productName": "ХичХайк Админ",
-  "author": "HitchHike Team",
+  "description": "Lets - Админ панель для управления автосервисами",
+  "productName": "Lets Админ",
+  "author": "Lets Team",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",

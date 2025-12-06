@@ -1,7 +1,7 @@
 [project]
-name = "hitchhike-backend"
+name = "lets-backend"
 version = "0.1.0"
-description = "HitchHike Backend API - Real-time service availability platform"
+description = "Lets Backend API - Real-time service availability platform"
 authors = [
     {name = "Evgeny Nazarov", email = "your.email@example.com"}
 ]

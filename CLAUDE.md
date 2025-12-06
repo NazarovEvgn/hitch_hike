@@ -179,13 +179,13 @@ admin-ionic-app/
 
 ## Project Overview
 
-**ХичХайк** (HitchHike) - Real-Time Service Availability Platform for auto service businesses (car washes, repair shops, tire services) integrated with 2GIS maps.
+**Lets** - Real-Time Service Availability Platform for auto service businesses (car washes, repair shops, tire services, beauty salons) integrated with 2GIS maps.
 
-**Brand:** ХичХайк
+**Brand:** Lets
 **Domains:**
-- хичхайк.рф (client PWA application)
-- api.хичхайк.рф (backend API)
-- admin.хичхайк.рф (admin panel)
+- lets.app (client PWA application)
+- api.lets.app (backend API)
+- admin.lets.app (admin panel)
 
 **Logo:** 👍 Thumbs up icon with color-coded availability:
 - 🟢 Green = available (0-15 min wait)
@@ -323,7 +323,7 @@ For clients (NO registration required):
   - URL: https://timeweb.cloud/
 - Nginx reverse proxy
 - SSL via Let's Encrypt (бесплатно)
-- Домены: хичхайк.рф, api.хичхайк.рф, admin.хичхайк.рф
+- Домены: lets.app, api.lets.app, admin.lets.app
 
 ## Development Commands
 
@@ -399,14 +399,14 @@ quasar build -m pwa                    # Build for production
 
 ### Database
 ```bash
-createdb hitchhike_db                  # Create database
-psql hitchhike_db                      # Connect to database
+createdb lets_db                       # Create database
+psql lets_db                           # Connect to database
 ```
 
 ## Project Structure
 
 ```
-hitchhike/
+lets-app/
 ├── backend/              # FastAPI application (http://localhost:8000)
 │   ├── app/
 │   │   ├── api/v1/      # API endpoints (auth, admin, client)
@@ -467,7 +467,7 @@ See **docs/dev_plan.md** for detailed technical stack, architecture, and develop
 - Admin receives notifications for new bookings
 
 **PWA Features:**
-- Installable on mobile devices (хичхайк.рф)
+- Installable on mobile devices (lets.app)
 - Offline support via service workers
 - Push notifications capability
 
@@ -484,7 +484,7 @@ Backend requires `.env` file (created from `.env.example`):
 ```bash
 # Database (use 127.0.0.1 instead of localhost on Windows)
 # Note: Docker PostgreSQL runs on port 5433 to avoid conflict with local PostgreSQL 17
-DATABASE_URL=postgresql+asyncpg://hitchhike:hitchhike@127.0.0.1:5433/hitchhike_db
+DATABASE_URL=postgresql+asyncpg://lets:lets@127.0.0.1:5433/lets_db
 
 # Redis
 REDIS_URL=redis://localhost:6379/0
