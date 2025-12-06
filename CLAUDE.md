@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **✅ Phase 1 Complete**: Backend infrastructure is implemented and database is ready.
 **✅ Phase 2 Complete**: Full REST API with all admin and client endpoints implemented.
 **✅ Phase 3 Complete**: Quasar Admin Panel with full authentication and core functionality tested.
+**🔄 Phase 4 In Progress**: Admin Panel Redesign & Business Profile Loading
 
 **What's implemented:**
 - ✅ FastAPI backend with uv package manager
@@ -21,10 +22,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ Database migrations with proper Enum values
 - ✅ Redis integration prepared
 - ✅ API documentation (see docs/api_endpoints.md)
-- ✅ **Quasar Admin Panel** (admin-app/) - **FULLY WORKING**
+- ✅ **Database updated** with beauty salon businesses (BEAUTY_SALON type added)
+  - ✅ "Familia" (2 locations: Менделеева 137к1, Чаркова 56)
+  - ✅ "Hollywood" (Тура 4/2)
+  - ✅ Test accounts: familia.mendeleeva@example.com / Familia123, familia.charkova@example.com / Familia123, hollywood.salon@example.com / Hollywood123
+- ✅ **Brand colors applied**: Purple #27126A (primary), Green #98EA14 (accent)
+  - ✅ Client app map markers: purple circles with green "available" indicator
+  - ✅ Admin panel Quasar variables configured
+- ✅ **Quasar Admin Panel** (admin-app/) - http://localhost:9001
   - ✅ Login page with JWT authentication (direct API calls)
-  - ✅ Main layout with navigation (7 pages)
-  - ✅ Dashboard with quick actions
+  - ✅ Main layout with purple header (bg-primary)
+  - ✅ Dashboard redesigned per dev_plan.md (single toggle, compact layout)
   - ✅ Status update page (PRIMARY FEATURE) - fully functional
   - ✅ **Services page** - CRUD operations tested (create, edit, delete, toggle active)
   - ✅ **Bookings page** - Status management tested (view, filter, update status)
@@ -32,8 +40,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - ✅ Pinia store for auth state management
   - ✅ Axios with automatic JWT token refresh
   - ✅ Tilda Sans fonts integrated (all weights)
-  - ✅ Running on http://localhost:9002
-  - ✅ **Test account**: admin@testcarwash.ru / Test123456
+
+**❌ CRITICAL ISSUE - Business Profile Not Loading in Header:**
+- **Problem**: After successful login, MainLayout header should display business name and address, but it shows empty values
+- **Root Cause**: Pinia store initialization timing issue - `useAuthStore()` called before Pinia is ready
+- **Attempts made**:
+  1. ❌ LoginPage.vue: Dynamic import + fetchProfile() → "getActivePinia() was called but there was no active Pinia" error
+  2. ❌ MainLayout.vue: onMounted() + fetchProfile() → Same Pinia error
+  3. ❌ router/index.js: beforeEach guard + fetchProfile() → No error in console, but `/api/v1/admin/business/profile` endpoint never called
+- **Backend Status**: `/api/v1/admin/business/profile` endpoint exists and works (tested manually returns correct data)
+- **Current State**:
+  - Login works ✅
+  - Dashboard loads ✅
+  - Status updates work ✅
+  - Bookings load ✅
+  - But authStore.business remains null → header shows empty strings
+- **Files affected**:
+  - `admin-app/src/pages/LoginPage.vue` (login logic)
+  - `admin-app/src/layouts/MainLayout.vue` (header display with businessName, businessAddress computed properties)
+  - `admin-app/src/stores/auth.js` (fetchProfile() method)
+  - `admin-app/src/router/index.js` (router guard with fetchProfile() call)
+  - `backend/app/api/v1/admin.py:25` (GET /admin/business/profile endpoint)
 
 **Known Issues & Solutions:**
 - ⚠️ **PostgreSQL Port Conflict**: If you have local PostgreSQL 17 installed, Docker uses port 5433 instead of 5432
@@ -42,6 +69,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ **Fixed**: JWT tokens now include `user_type` field for business_admin authentication
 - ✅ **Fixed**: LoginPage uses direct API calls to avoid Pinia initialization timing issues
 - ✅ **Fixed**: CORS configured for multiple dev server ports (9000, 9001, 9002, 3000)
+- ✅ **Fixed**: DashboardPage endpoint changed from `/admin/status` to `/admin/status/current` (405 error resolved)
 
 **✅ Phase 4 Complete:** Client PWA Application - 2GIS Map Integration
 - ✅ **Quasar PWA project created** (client-app/) - http://localhost:9002

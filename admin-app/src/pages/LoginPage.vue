@@ -66,6 +66,7 @@
 import { defineComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { api } from '../boot/axios'
 
 export default defineComponent({
   name: 'LoginPage',
@@ -84,14 +85,15 @@ export default defineComponent({
       loading.value = true
 
       try {
-        // Direct API call to avoid Pinia issues
-        const { api } = await import('../boot/axios')
+        // Direct API call - router guard will load the profile
         const response = await api.post('/auth/login/business', {
           email: email.value,
           password: password.value
         })
 
         const { access_token, refresh_token } = response.data
+
+        // Store tokens
         localStorage.setItem('accessToken', access_token)
         localStorage.setItem('refreshToken', refresh_token)
 
@@ -102,9 +104,11 @@ export default defineComponent({
           message: 'Успешный вход!'
         })
 
+        // Navigate to home - router guard will load business profile
         router.push({ name: 'home' })
       } catch (error) {
         loading.value = false
+        console.error('Login error:', error)
         $q.notify({
           type: 'negative',
           message: error.response?.data?.detail || 'Ошибка входа'

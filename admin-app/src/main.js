@@ -31,8 +31,7 @@ app.use(pinia)
 app.use(router)
 
 // Setup router guards AFTER app is fully configured
-router.beforeEach((to, from, next) => {
-  // Check authentication via localStorage directly to avoid Pinia timing issues
+router.beforeEach(async (to, from, next) => {
   const hasToken = !!localStorage.getItem('accessToken')
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
 
@@ -41,6 +40,20 @@ router.beforeEach((to, from, next) => {
   } else if (to.name === 'login' && hasToken) {
     next({ name: 'home' })
   } else {
+    // Load business profile if authenticated and not loaded yet
+    if (hasToken && to.name !== 'login') {
+      try {
+        // Dynamic import to ensure Pinia is ready
+        const { useAuthStore } = await import('./stores/auth')
+        const authStore = useAuthStore()
+        if (!authStore.business) {
+          console.log('[Router Guard] Loading business profile...')
+          await authStore.fetchProfile()
+        }
+      } catch (error) {
+        console.error('[Router Guard] Failed to load business profile:', error)
+      }
+    }
     next()
   }
 })

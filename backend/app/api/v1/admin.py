@@ -6,10 +6,12 @@ from sqlalchemy import select, func, and_, delete
 from app.core.database import get_db
 from app.api.dependencies import get_current_business_admin
 from app.models.business import Business, BusinessAdmin, BusinessStatus, StatusHistory, AvailabilityStatus, BusinessHours
+from app.models.business_photo import BusinessPhoto
 from app.models.service import Service
 from app.models.booking import Booking, BookingStatus
 from app.models.promotion import Promotion
 from app.schemas.business import Business as BusinessSchema, BusinessUpdate, BusinessStatusUpdate
+from app.schemas.business_photo import BusinessPhoto as BusinessPhotoSchema, BusinessPhotoCreate, BusinessPhotoUpdate
 from app.schemas.service import Service as ServiceSchema, ServiceCreate, ServiceUpdate
 from app.schemas.booking import Booking as BookingSchema, BookingUpdate
 from app.schemas.promotion import Promotion as PromotionSchema, PromotionCreate, PromotionUpdate
@@ -614,3 +616,153 @@ async def update_business_hours(
         await db.refresh(hour)
 
     return new_hours
+
+
+# =============================================================================
+# BUSINESS PHOTOS MANAGEMENT
+# =============================================================================
+
+@router.get("/business/photos", response_model=list[BusinessPhotoSchema])
+async def get_business_photos(
+    current_admin: BusinessAdmin = Depends(get_current_business_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get all photos for the business."""
+    result = await db.execute(
+        select(BusinessPhoto)
+        .where(BusinessPhoto.business_id == current_admin.business_id)
+        .order_by(BusinessPhoto.display_order, BusinessPhoto.created_at)
+    )
+    photos = result.scalars().all()
+    return photos
+
+
+@router.post("/business/photos", response_model=BusinessPhotoSchema, status_code=status.HTTP_201_CREATED)
+async def create_business_photo(
+    photo_data: BusinessPhotoCreate,
+    current_admin: BusinessAdmin = Depends(get_current_business_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Add a new photo to the business."""
+    new_photo = BusinessPhoto(
+        business_id=current_admin.business_id,
+        photo_url=photo_data.photo_url,
+        display_order=photo_data.display_order,
+        is_main=False
+    )
+
+    db.add(new_photo)
+    await db.commit()
+    await db.refresh(new_photo)
+
+    return new_photo
+
+
+@router.patch("/business/photos/{photo_id}", response_model=BusinessPhotoSchema)
+async def update_business_photo(
+    photo_id: int,
+    photo_data: BusinessPhotoUpdate,
+    current_admin: BusinessAdmin = Depends(get_current_business_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a business photo."""
+    result = await db.execute(
+        select(BusinessPhoto).where(
+            and_(
+                BusinessPhoto.id == photo_id,
+                BusinessPhoto.business_id == current_admin.business_id,
+            )
+        )
+    )
+    photo = result.scalar_one_or_none()
+
+    if not photo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Photo not found",
+        )
+
+    # If setting this photo as main, unset all other main photos
+    if photo_data.is_main:
+        await db.execute(
+            select(BusinessPhoto)
+            .where(BusinessPhoto.business_id == current_admin.business_id)
+            .update({"is_main": False})
+        )
+
+    # Update photo
+    update_data = photo_data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(photo, field, value)
+
+    await db.commit()
+    await db.refresh(photo)
+
+    return photo
+
+
+@router.patch("/business/photos/{photo_id}/set-main")
+async def set_main_photo(
+    photo_id: int,
+    current_admin: BusinessAdmin = Depends(get_current_business_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Set a photo as the main photo for the business."""
+    # Verify photo belongs to this business
+    result = await db.execute(
+        select(BusinessPhoto).where(
+            and_(
+                BusinessPhoto.id == photo_id,
+                BusinessPhoto.business_id == current_admin.business_id,
+            )
+        )
+    )
+    photo = result.scalar_one_or_none()
+
+    if not photo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Photo not found",
+        )
+
+    # Unset all main photos for this business
+    result = await db.execute(
+        select(BusinessPhoto).where(BusinessPhoto.business_id == current_admin.business_id)
+    )
+    all_photos = result.scalars().all()
+    for p in all_photos:
+        p.is_main = False
+
+    # Set this photo as main
+    photo.is_main = True
+
+    await db.commit()
+
+    return {"success": True, "message": "Main photo updated"}
+
+
+@router.delete("/business/photos/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_business_photo(
+    photo_id: int,
+    current_admin: BusinessAdmin = Depends(get_current_business_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a business photo."""
+    result = await db.execute(
+        select(BusinessPhoto).where(
+            and_(
+                BusinessPhoto.id == photo_id,
+                BusinessPhoto.business_id == current_admin.business_id,
+            )
+        )
+    )
+    photo = result.scalar_one_or_none()
+
+    if not photo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Photo not found",
+        )
+
+    await db.delete(photo)
+    await db.commit()

@@ -84,6 +84,9 @@ class Business(Base):
     promotions: Mapped[list["Promotion"]] = relationship(
         "Promotion", back_populates="business", lazy="selectin"
     )
+    photos: Mapped[list["BusinessPhoto"]] = relationship(
+        "BusinessPhoto", back_populates="business", lazy="selectin"
+    )
 
 
 class BusinessAdmin(Base):

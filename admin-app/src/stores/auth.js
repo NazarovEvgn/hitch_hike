@@ -62,10 +62,15 @@ export const useAuthStore = defineStore('auth', {
 
     async fetchProfile() {
       try {
+        console.log('[fetchProfile] Starting...')
         const response = await api.get('/admin/business/profile')
+        console.log('[fetchProfile] Response received:', response.data)
         this.business = response.data
+        console.log('[fetchProfile] Business set in store:', this.business)
+        console.log('[fetchProfile] Business name:', this.business?.name)
+        console.log('[fetchProfile] Business address:', this.business?.address)
       } catch (error) {
-        console.error('Failed to fetch profile:', error)
+        console.error('[fetchProfile] Error:', error)
       }
     },
 

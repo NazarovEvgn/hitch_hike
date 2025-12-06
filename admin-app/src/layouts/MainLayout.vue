@@ -6,8 +6,8 @@
 
         <q-toolbar-title>
           <div class="column">
-            <div class="text-weight-medium">{{ businessName }}</div>
-            <div class="text-caption">{{ businessAddress }}</div>
+            <div class="text-weight-medium">{{ businessName || 'Загрузка...' }}</div>
+            <div class="text-caption">{{ businessAddress || '' }}</div>
           </div>
         </q-toolbar-title>
 
@@ -57,9 +57,8 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
 import { useQuasar } from 'quasar'
 
 export default defineComponent({
@@ -69,22 +68,31 @@ export default defineComponent({
     const $q = useQuasar()
     const router = useRouter()
     const leftDrawerOpen = ref(false)
+    const businessName = ref('')
+    const businessAddress = ref('')
+    let authStore = null
 
-    const businessName = computed(() => {
+    onMounted(async () => {
       try {
-        const authStore = useAuthStore()
-        return authStore.businessName || 'Админ панель'
-      } catch (e) {
-        return 'Админ панель'
-      }
-    })
+        // Dynamic import to ensure Pinia is ready
+        const { useAuthStore } = await import('../stores/auth')
+        authStore = useAuthStore()
+        businessName.value = authStore.businessName
+        businessAddress.value = authStore.businessAddress
 
-    const businessAddress = computed(() => {
-      try {
-        const authStore = useAuthStore()
-        return authStore.businessAddress || ''
-      } catch (e) {
-        return ''
+        // Watch for changes
+        const unwatch = () => {
+          businessName.value = authStore.businessName
+          businessAddress.value = authStore.businessAddress
+        }
+
+        // Update every second to catch changes
+        const interval = setInterval(unwatch, 1000)
+
+        // Cleanup on unmount
+        return () => clearInterval(interval)
+      } catch (error) {
+        console.error('Failed to load auth store:', error)
       }
     })
 
@@ -92,20 +100,26 @@ export default defineComponent({
       leftDrawerOpen.value = !leftDrawerOpen.value
     }
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
       $q.dialog({
         title: 'Выход',
         message: 'Вы уверены, что хотите выйти?',
         cancel: true,
         persistent: true
-      }).onOk(() => {
+      }).onOk(async () => {
         try {
-          const authStore = useAuthStore()
+          if (!authStore) {
+            const { useAuthStore } = await import('../stores/auth')
+            authStore = useAuthStore()
+          }
           authStore.logout()
-        } catch (e) {
-          console.warn('Logout error:', e)
+          router.push({ name: 'login' })
+        } catch (error) {
+          console.error('Logout error:', error)
+          localStorage.removeItem('accessToken')
+          localStorage.removeItem('refreshToken')
+          router.push({ name: 'login' })
         }
-        router.push({ name: 'login' })
       })
     }
 

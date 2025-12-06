@@ -16,7 +16,7 @@
           />
         </div>
 
-        <div v-if="isAvailable" class="q-mt-sm text-caption text-positive">
+        <div v-if="isAvailable" class="q-mt-sm text-caption text-dark">
           ✓ Статус "Свободен" отображается клиентам
         </div>
         <div v-else class="q-mt-sm text-caption text-grey">
@@ -42,22 +42,18 @@
     <div class="row q-col-gutter-sm q-mt-md">
       <div class="col-6">
         <q-btn
-          color="secondary"
-          icon="build"
-          label="Управлять услугами и ценами"
+          color="primary"
+          label="Услуги и цены"
           class="full-width"
           :to="{ name: 'services' }"
-          stack
         />
       </div>
       <div class="col-6">
         <q-btn
           color="primary"
-          icon="account_circle"
           label="Личный кабинет"
           class="full-width"
           :to="{ name: 'profile' }"
-          stack
         />
       </div>
     </div>
@@ -82,7 +78,7 @@ export default defineComponent({
     // Загрузка текущего статуса
     const loadStatus = async () => {
       try {
-        const response = await api.get('/admin/status')
+        const response = await api.get('/admin/status/current')
         isAvailable.value = response.data.status === 'available'
       } catch (error) {
         console.error('Failed to load status:', error)
