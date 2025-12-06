@@ -99,6 +99,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 🔄 Online booking form (placeholder - to be implemented)
 - 🔄 Favorites functionality (placeholder - to be implemented)
 
+**✅ REBRANDING COMPLETE (December 6, 2025):**
+Project successfully rebranded from "ХичХайк (HitchHike)" to "Lets"
+
+**What was done:**
+- ✅ Updated all documentation (dev_concept.md, dev_plan.md, README.md, CLAUDE.md)
+- ✅ Changed domains: хичхайк.рф → lets.app, api.хичхайк.рф → api.lets.app, admin.хичхайк.рф → admin.lets.app
+- ✅ Renamed database: hitchhike_db → lets_db (user: lets, password: lets)
+- ✅ Updated backend files: pyproject.toml (lets-backend), alembic.ini, main.py (Lets API)
+- ✅ Updated frontend packages: admin-app (lets-admin), client-app (lets-client)
+- ✅ Recreated Docker containers: hitchhike_postgres → lets_postgres, hitchhike_redis → lets_redis
+- ✅ Created database backup: database_backup_20251206_203126.sql (36KB)
+- ✅ Restored all data to new database (3 businesses, 3 admins, 1 service, 1 booking)
+- ✅ Updated backend/.env with new DATABASE_URL (postgresql+asyncpg://lets:lets@127.0.0.1:5433/lets_db)
+- ✅ GitHub repository renamed: hitch_hike → lets-app (https://github.com/NazarovEvgn/lets-app)
+- ✅ Backend server restarted and working with new database
+- ✅ All commits pushed to main branch
+
+**⚠️ PENDING ACTION:**
+- **Local folder rename**: After this session, rename C:\Projects\hitch_hike → C:\Projects\lets-app
+- **Update git remote**: After rename, run `git remote set-url origin https://github.com/NazarovEvgn/lets-app.git` (or it will auto-update)
+
+**Test credentials** (still valid after rebrand):
+- familia.mendeleeva@example.com / Familia123
+- familia.charkova@example.com / Familia123
+- hollywood.salon@example.com / Hollywood123
+
 **🔄 Phase 5 (In Progress):** Migration to Ionic Framework + Tailwind CSS
 
 **Decision rationale:**
@@ -514,3 +540,71 @@ ENVIRONMENT=development
 - Code and comments: English recommended
 - UI for Russian market: Russian language
 - Database/API naming: English conventions
+
+---
+
+## 🚀 NEXT SESSION INSTRUCTIONS (After Folder Rename)
+
+**Current Status (December 6, 2025, 20:35):**
+- ✅ Rebranding complete (ХичХайк → Lets)
+- ✅ GitHub repository renamed to `lets-app`
+- ✅ Docker containers recreated (lets_postgres, lets_redis)
+- ✅ Database migrated and restored (lets_db)
+- ✅ Backend server running on new database
+- ⏸️ **SESSION PAUSED** - waiting for local folder rename
+
+**After you rename the folder C:\Projects\hitch_hike → C:\Projects\lets-app:**
+
+1. **Verify new location:**
+   ```bash
+   cd C:\Projects\lets-app
+   pwd  # Should show C:/Projects/lets-app
+   ```
+
+2. **Check git remote (should auto-update):**
+   ```bash
+   git remote -v
+   # Should show: https://github.com/NazarovEvgn/lets-app.git
+   ```
+
+3. **Verify Docker containers are running:**
+   ```bash
+   docker ps
+   # Should see: lets_postgres (healthy), lets_redis (healthy)
+   ```
+
+4. **Start development servers:**
+   ```bash
+   # Backend
+   cd backend
+   uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+
+   # Admin panel (in new terminal)
+   cd admin-app
+   npm run dev  # http://localhost:9001
+   ```
+
+5. **Test login with credentials:**
+   - familia.mendeleeva@example.com / Familia123
+   - familia.charkova@example.com / Familia123
+   - hollywood.salon@example.com / Hollywood123
+
+**Next tasks - Ionic Migration:**
+
+Once you verify everything works after folder rename, we'll begin Phase 5:
+
+1. Install Ionic CLI: `npm install -g @ionic/cli`
+2. Create admin Ionic app: `ionic start lets-admin-ionic blank --type vue`
+3. Create client Ionic app: `ionic start lets-client-ionic blank --type vue`
+4. Setup Tailwind CSS in both apps
+5. Setup Capacitor for PWA
+6. Implement Feature-Based Architecture
+7. Port existing functionality from Quasar apps
+
+**Important files to remember:**
+- Database backup: `database_backup_20251206_203126.sql` (keep for safety)
+- Backend .env: Already updated with new credentials (not in git)
+- Docker compose: Already using new container names
+- Test accounts: 3 beauty salons with admin access
+
+**Current working directory after rename:** `C:\Projects\lets-app`
