@@ -23,6 +23,7 @@ class Booking(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     business_id: Mapped[int] = mapped_column(ForeignKey("businesses.id"), index=True)
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    employee_id: Mapped[int | None] = mapped_column(ForeignKey("employees.id"), nullable=True, index=True)
     service_id: Mapped[int] = mapped_column(ForeignKey("services.id"), index=True)
     booking_date: Mapped[date] = mapped_column(Date, index=True)
     booking_time: Mapped[time] = mapped_column(Time)
@@ -43,4 +44,5 @@ class Booking(Base):
     # Relationships
     business: Mapped["Business"] = relationship("Business", back_populates="bookings")
     user: Mapped["User"] = relationship("User", back_populates="bookings")
+    employee: Mapped["Employee"] = relationship("Employee", back_populates="bookings")
     service: Mapped["Service"] = relationship("Service", back_populates="bookings")

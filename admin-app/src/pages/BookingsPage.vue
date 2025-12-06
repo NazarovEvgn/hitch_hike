@@ -1,6 +1,47 @@
 <template>
   <q-page padding>
-    <div class="text-h4 q-mb-md">Онлайн-записи</div>
+    <div class="row items-center q-mb-md">
+      <div class="col">
+        <div class="text-h4">Онлайн-записи</div>
+      </div>
+      <div class="col-auto">
+        <q-btn
+          color="primary"
+          icon="add"
+          label="Добавить онлайн-запись"
+          @click="showCreateBookingDialog = true"
+          unelevated
+        />
+      </div>
+    </div>
+
+    <!-- Блок специалистов -->
+    <q-card class="q-mb-md">
+      <q-card-section>
+        <div class="text-subtitle1 q-mb-md">Записи по специалистам</div>
+        <div class="row q-col-gutter-md">
+          <div
+            v-for="emp in employeesWithBookings"
+            :key="emp.employee_id"
+            class="col-12 col-sm-6 col-md-4"
+          >
+            <q-card flat bordered class="cursor-pointer" @click="filterByEmployee(emp.employee_id)">
+              <q-card-section class="row items-center">
+                <div class="col">
+                  <div class="text-weight-medium">{{ emp.employee_name }}</div>
+                  <div class="text-caption text-grey-7">Специалист</div>
+                </div>
+                <div class="col-auto">
+                  <q-badge color="primary" class="q-px-md">
+                    {{ emp.booking_count }}
+                  </q-badge>
+                </div>
+              </q-card-section>
+            </q-card>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
 
     <!-- Фильтры -->
     <q-card class="q-mb-md">
@@ -330,6 +371,128 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <!-- Диалог создания записи -->
+    <q-dialog v-model="showCreateBookingDialog" persistent>
+      <q-card style="min-width: 600px; max-width: 800px">
+        <q-card-section>
+          <div class="text-h6">Создать онлайн-запись</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-form @submit="createBooking" class="q-gutter-md">
+            <div class="row q-col-gutter-md">
+              <div class="col-12 col-md-6">
+                <q-select
+                  v-model="newBooking.service_id"
+                  :options="services"
+                  option-value="id"
+                  option-label="name"
+                  emit-value
+                  map-options
+                  label="Услуга *"
+                  filled
+                  dense
+                  :rules="[val => !!val || 'Выберите услугу']"
+                />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <q-select
+                  v-model="newBooking.employee_id"
+                  :options="employees"
+                  option-value="id"
+                  option-label="name"
+                  emit-value
+                  map-options
+                  label="Специалист"
+                  filled
+                  dense
+                  clearable
+                />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <q-input
+                  v-model="newBooking.booking_date"
+                  label="Дата записи *"
+                  type="date"
+                  filled
+                  dense
+                  :rules="[val => !!val || 'Укажите дату']"
+                />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <q-input
+                  v-model="newBooking.booking_time"
+                  label="Время записи *"
+                  type="time"
+                  filled
+                  dense
+                  :rules="[val => !!val || 'Укажите время']"
+                />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <q-input
+                  v-model="newBooking.client_name"
+                  label="Имя клиента *"
+                  filled
+                  dense
+                  :rules="[val => !!val || 'Укажите имя клиента']"
+                />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <q-input
+                  v-model="newBooking.client_phone"
+                  label="Телефон клиента *"
+                  filled
+                  dense
+                  mask="+7 (###) ###-##-##"
+                  :rules="[val => !!val || 'Укажите телефон']"
+                />
+              </div>
+
+              <div class="col-12">
+                <q-input
+                  v-model="newBooking.notes"
+                  label="Примечания"
+                  type="textarea"
+                  filled
+                  dense
+                  rows="3"
+                  autogrow
+                />
+              </div>
+            </div>
+
+            <div class="row q-col-gutter-sm q-mt-md">
+              <div class="col">
+                <q-btn
+                  label="Отмена"
+                  flat
+                  color="grey"
+                  @click="closeCreateBookingDialog"
+                  class="full-width"
+                />
+              </div>
+              <div class="col">
+                <q-btn
+                  label="Создать запись"
+                  type="submit"
+                  color="primary"
+                  unelevated
+                  :loading="creatingBooking"
+                  class="full-width"
+                />
+              </div>
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -347,9 +510,26 @@ export default defineComponent({
     const loading = ref(false)
     const detailsDialog = ref(false)
     const selectedBooking = ref(null)
+    const showCreateBookingDialog = ref(false)
+    const creatingBooking = ref(false)
+
+    const employees = ref([])
+    const services = ref([])
+    const employeesWithBookings = ref([])
+
+    const newBooking = ref({
+      service_id: null,
+      employee_id: null,
+      booking_date: '',
+      booking_time: '',
+      client_name: '',
+      client_phone: '',
+      notes: ''
+    })
 
     const filters = ref({
-      status: null
+      status: null,
+      employee_id: null
     })
 
     const statusOptions = [
@@ -444,11 +624,79 @@ export default defineComponent({
       })
     }
 
+    const fetchEmployees = async () => {
+      try {
+        const response = await api.get('/admin/employees')
+        employees.value = response.data
+      } catch (error) {
+        console.error('Ошибка загрузки специалистов:', error)
+      }
+    }
+
+    const fetchServices = async () => {
+      try {
+        const response = await api.get('/admin/services')
+        services.value = response.data
+      } catch (error) {
+        console.error('Ошибка загрузки услуг:', error)
+      }
+    }
+
+    const fetchEmployeeBookingStats = async () => {
+      try {
+        const response = await api.get('/admin/bookings/by-employee')
+        employeesWithBookings.value = response.data
+      } catch (error) {
+        console.error('Ошибка загрузки статистики по специалистам:', error)
+      }
+    }
+
+    const filterByEmployee = (employeeId) => {
+      filters.value.employee_id = employeeId
+      fetchBookings()
+    }
+
+    const createBooking = async () => {
+      creatingBooking.value = true
+      try {
+        await api.post('/admin/bookings', newBooking.value)
+        $q.notify({
+          type: 'positive',
+          message: 'Запись успешно создана'
+        })
+        closeCreateBookingDialog()
+        await fetchBookings()
+        await fetchEmployeeBookingStats()
+      } catch (error) {
+        $q.notify({
+          type: 'negative',
+          message: 'Ошибка создания записи',
+          caption: error.response?.data?.detail || error.message
+        })
+      } finally {
+        creatingBooking.value = false
+      }
+    }
+
+    const closeCreateBookingDialog = () => {
+      showCreateBookingDialog.value = false
+      newBooking.value = {
+        service_id: null,
+        employee_id: null,
+        booking_date: '',
+        booking_time: '',
+        client_name: '',
+        client_phone: '',
+        notes: ''
+      }
+    }
+
     const fetchBookings = async () => {
       loading.value = true
       try {
         const params = {}
         if (filters.value.status) params.status = filters.value.status.value || filters.value.status
+        if (filters.value.employee_id) params.employee_id = filters.value.employee_id
 
         const response = await api.get('/admin/bookings', { params })
         bookings.value = response.data
@@ -493,6 +741,9 @@ export default defineComponent({
 
     onMounted(() => {
       fetchBookings()
+      fetchEmployees()
+      fetchServices()
+      fetchEmployeeBookingStats()
     })
 
     return {
@@ -503,14 +754,24 @@ export default defineComponent({
       statusOptions,
       detailsDialog,
       selectedBooking,
+      showCreateBookingDialog,
+      creatingBooking,
+      employees,
+      services,
+      employeesWithBookings,
+      newBooking,
       getStatusColor,
       getStatusLabel,
       formatDate,
       formatDateTime,
       fetchBookings,
       viewBookingDetails,
-      updateBookingStatus
+      updateBookingStatus,
+      filterByEmployee,
+      createBooking,
+      closeCreateBookingDialog
     }
   }
 })
+// Раздел онлайн-записей с функционалом создания записей вручную
 </script>

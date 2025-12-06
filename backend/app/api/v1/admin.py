@@ -7,13 +7,15 @@ from app.core.database import get_db
 from app.api.dependencies import get_current_business_admin
 from app.models.business import Business, BusinessAdmin, BusinessStatus, StatusHistory, AvailabilityStatus, BusinessHours
 from app.models.business_photo import BusinessPhoto
+from app.models.employee import Employee
 from app.models.service import Service
 from app.models.booking import Booking, BookingStatus
 from app.models.promotion import Promotion
 from app.schemas.business import Business as BusinessSchema, BusinessUpdate, BusinessStatusUpdate
 from app.schemas.business_photo import BusinessPhoto as BusinessPhotoSchema, BusinessPhotoCreate, BusinessPhotoUpdate
+from app.schemas.employee import Employee as EmployeeSchema, EmployeeCreate, EmployeeUpdate
 from app.schemas.service import Service as ServiceSchema, ServiceCreate, ServiceUpdate
-from app.schemas.booking import Booking as BookingSchema, BookingUpdate
+from app.schemas.booking import Booking as BookingSchema, BookingCreate, BookingUpdate
 from app.schemas.promotion import Promotion as PromotionSchema, PromotionCreate, PromotionUpdate
 from app.schemas.business_hours import BusinessHoursResponse, BusinessHoursBulkUpdate
 
@@ -288,6 +290,7 @@ async def delete_service(
 @router.get("/bookings", response_model=list[BookingSchema])
 async def get_bookings(
     status: str | None = None,
+    employee_id: int | None = None,
     limit: int = 50,
     current_admin: BusinessAdmin = Depends(get_current_business_admin),
     db: AsyncSession = Depends(get_db),
@@ -297,6 +300,9 @@ async def get_bookings(
 
     if status:
         query = query.where(Booking.status == BookingStatus(status))
+
+    if employee_id:
+        query = query.where(Booking.employee_id == employee_id)
 
     query = query.order_by(Booking.booking_date.desc(), Booking.booking_time.desc()).limit(limit)
 
@@ -766,3 +772,212 @@ async def delete_business_photo(
 
     await db.delete(photo)
     await db.commit()
+
+    return {"success": True, "message": "Photo deleted"}
+
+
+# EMPLOYEES MANAGEMENT
+
+
+@router.get("/employees", response_model=list[EmployeeSchema])
+async def get_employees(
+    current_admin: BusinessAdmin = Depends(get_current_business_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get all employees for the business."""
+    result = await db.execute(
+        select(Employee)
+        .where(Employee.business_id == current_admin.business_id)
+        .order_by(Employee.name)
+    )
+    employees = result.scalars().all()
+    return employees
+
+
+@router.post("/employees", response_model=EmployeeSchema, status_code=status.HTTP_201_CREATED)
+async def create_employee(
+    employee_data: EmployeeCreate,
+    current_admin: BusinessAdmin = Depends(get_current_business_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a new employee."""
+    employee = Employee(
+        business_id=current_admin.business_id,
+        name=employee_data.name,
+        phone=employee_data.phone,
+        position=employee_data.position,
+        is_active=employee_data.is_active,
+    )
+
+    db.add(employee)
+    await db.commit()
+    await db.refresh(employee)
+
+    return employee
+
+
+@router.patch("/employees/{employee_id}", response_model=EmployeeSchema)
+async def update_employee(
+    employee_id: int,
+    employee_data: EmployeeUpdate,
+    current_admin: BusinessAdmin = Depends(get_current_business_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update employee information."""
+    result = await db.execute(
+        select(Employee).where(
+            and_(
+                Employee.id == employee_id,
+                Employee.business_id == current_admin.business_id,
+            )
+        )
+    )
+    employee = result.scalar_one_or_none()
+
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee not found",
+        )
+
+    if employee_data.name is not None:
+        employee.name = employee_data.name
+    if employee_data.phone is not None:
+        employee.phone = employee_data.phone
+    if employee_data.position is not None:
+        employee.position = employee_data.position
+    if employee_data.is_active is not None:
+        employee.is_active = employee_data.is_active
+
+    employee.updated_at = datetime.utcnow()
+    await db.commit()
+    await db.refresh(employee)
+
+    return employee
+
+
+@router.delete("/employees/{employee_id}")
+async def delete_employee(
+    employee_id: int,
+    current_admin: BusinessAdmin = Depends(get_current_business_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete an employee."""
+    result = await db.execute(
+        select(Employee).where(
+            and_(
+                Employee.id == employee_id,
+                Employee.business_id == current_admin.business_id,
+            )
+        )
+    )
+    employee = result.scalar_one_or_none()
+
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee not found",
+        )
+
+    await db.delete(employee)
+    await db.commit()
+
+    return {"success": True, "message": "Employee deleted"}
+
+
+# BOOKINGS MANAGEMENT (EXTENDED)
+
+
+@router.post("/bookings", response_model=BookingSchema, status_code=status.HTTP_201_CREATED)
+async def create_booking(
+    booking_data: BookingCreate,
+    current_admin: BusinessAdmin = Depends(get_current_business_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a new booking (admin creates booking manually)."""
+    # Verify service belongs to this business
+    service_result = await db.execute(
+        select(Service).where(
+            and_(
+                Service.id == booking_data.service_id,
+                Service.business_id == current_admin.business_id,
+            )
+        )
+    )
+    service = service_result.scalar_one_or_none()
+
+    if not service:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Service not found",
+        )
+
+    # Verify employee belongs to this business (if provided)
+    if booking_data.employee_id:
+        employee_result = await db.execute(
+            select(Employee).where(
+                and_(
+                    Employee.id == booking_data.employee_id,
+                    Employee.business_id == current_admin.business_id,
+                )
+            )
+        )
+        employee = employee_result.scalar_one_or_none()
+
+        if not employee:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Employee not found",
+            )
+
+    booking = Booking(
+        business_id=current_admin.business_id,
+        service_id=booking_data.service_id,
+        employee_id=booking_data.employee_id,
+        booking_date=booking_data.booking_date,
+        booking_time=booking_data.booking_time,
+        client_name=booking_data.client_name,
+        client_phone=booking_data.client_phone,
+        notes=booking_data.notes,
+        status=BookingStatus.CONFIRMED,  # Admin bookings are confirmed by default
+        came_through_app=False,  # Manual booking by admin
+    )
+
+    db.add(booking)
+    await db.commit()
+    await db.refresh(booking)
+
+    return booking
+
+
+@router.get("/bookings/by-employee")
+async def get_bookings_by_employee(
+    current_admin: BusinessAdmin = Depends(get_current_business_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get booking counts grouped by employee."""
+    result = await db.execute(
+        select(
+            Employee.id,
+            Employee.name,
+            func.count(Booking.id).label("booking_count")
+        )
+        .outerjoin(Booking, and_(
+            Booking.employee_id == Employee.id,
+            Booking.status.in_([BookingStatus.PENDING, BookingStatus.CONFIRMED])
+        ))
+        .where(Employee.business_id == current_admin.business_id)
+        .group_by(Employee.id, Employee.name)
+        .order_by(Employee.name)
+    )
+
+    employees_with_bookings = [
+        {
+            "employee_id": row.id,
+            "employee_name": row.name,
+            "booking_count": row.booking_count,
+        }
+        for row in result.all()
+    ]
+
+    return employees_with_bookings

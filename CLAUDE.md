@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **✅ Phase 1 Complete**: Backend infrastructure is implemented and database is ready.
 **✅ Phase 2 Complete**: Full REST API with all admin and client endpoints implemented.
 **✅ Phase 3 Complete**: Quasar Admin Panel with full authentication and core functionality tested.
-**🔄 Phase 4 In Progress**: Admin Panel Redesign & Business Profile Loading
+**✅ Phase 4 Complete**: Client PWA Application - 2GIS Map Integration
+**🔄 Phase 5 In Progress**: Migration to Ionic Framework + Tailwind CSS
 
 **What's implemented:**
 - ✅ FastAPI backend with uv package manager
@@ -98,12 +99,83 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 🔄 Online booking form (placeholder - to be implemented)
 - 🔄 Favorites functionality (placeholder - to be implemented)
 
-**Phase 5 (Next):** Booking System & Additional Features
+**🔄 Phase 5 (In Progress):** Migration to Ionic Framework + Tailwind CSS
+
+**Decision rationale:**
+- Both admin and client apps will be used primarily on smartphones
+- Quasar has good PWA support but design feels dated (Material Design ~2020)
+- Ionic Framework provides modern native mobile UX (iOS 17 / Material Design 3)
+- Tailwind CSS adds flexibility for custom components and brand styling
+
+**Migration plan:**
+1. **Create new Ionic projects** (admin-ionic-app/ and client-ionic-app/)
+   - Use Ionic CLI with Vue 3 template
+   - Install Tailwind CSS for custom styling
+   - Setup Capacitor for PWA + future native builds
+
+2. **Port backend integration**
+   - Copy Pinia stores (auth, business state)
+   - Setup Axios with JWT interceptors
+   - Configure API base URL and CORS
+
+3. **Rebuild UI with Ionic components + Tailwind**
+   - Use Ionic components for navigation, modals, cards, lists
+   - Use Tailwind for custom layouts, gradients, spacing
+   - Apply brand colors via CSS Variables + Tailwind config
+
+4. **Maintain feature parity**
+   - All existing features from Quasar apps
+   - Improved mobile UX with native iOS/Android styles
+   - Swipe gestures, pull-to-refresh, native animations
+
+**Technology stack:**
+- **Ionic Framework 7.x** - Native mobile components
+- **Vue 3 Composition API** - Same as current apps
+- **Tailwind CSS 3.x** - Utility-first styling
+- **Capacitor 5.x** - PWA + Native capabilities
+- **Pinia** - State management (same as current)
+- **Axios** - HTTP client with JWT (same as current)
+
+**Architecture:** Feature-Based Architecture
+- Each business feature (auth, bookings, services, employees, business-status, profile) is a self-contained module
+- Feature structure: `components/`, `stores/`, `services/`, `pages/`, `types/`
+- Shared components and utilities in `shared/` directory
+- Core infrastructure (API, router, config) in `core/` directory
+- No Atomic Design - keeping it simple and pragmatic
+
+**Project structure:**
+```
+admin-ionic-app/
+├── src/
+│   ├── features/           # Business features (isolated modules)
+│   │   ├── auth/
+│   │   ├── bookings/
+│   │   ├── services/
+│   │   ├── employees/
+│   │   ├── business-status/
+│   │   ├── profile/
+│   │   └── dashboard/
+│   ├── shared/             # Reusable across features
+│   │   ├── components/
+│   │   ├── composables/
+│   │   ├── utils/
+│   │   ├── types/
+│   │   └── layouts/
+│   └── core/               # Infrastructure
+│       ├── api/
+│       ├── router/
+│       └── config/
+```
+
+**Timeline estimate:** 2-3 days for both apps
+
+**Phase 6 (Next):** Additional Features & Production Deployment
 - Online booking form (no registration required for clients)
 - Favorites functionality (localStorage)
-- Implement remaining admin pages (Promotions CRUD, Analytics dashboard, Profile settings)
 - WebSocket for real-time status updates
-- Production deployment preparation
+- Complete remaining admin features (Promotions, Analytics, Advanced Profile)
+- Production deployment with Capacitor PWA
+- Optional: Native iOS/Android builds via Capacitor
 
 ## Project Overview
 

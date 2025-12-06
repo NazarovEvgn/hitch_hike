@@ -6,6 +6,7 @@ class BookingBase(BaseModel):
     """Base booking schema."""
 
     service_id: int
+    employee_id: int | None = None
     booking_date: date
     booking_time: time
     client_name: str
@@ -14,9 +15,9 @@ class BookingBase(BaseModel):
 
 
 class BookingCreate(BookingBase):
-    """Booking creation schema."""
+    """Booking creation schema for admin."""
 
-    business_id: int
+    pass
 
 
 class BookingUpdate(BaseModel):
@@ -34,6 +35,7 @@ class Booking(BookingBase):
     id: int
     business_id: int
     user_id: int | None = None
+    employee_id: int | None = None
     status: str
     came_through_app: bool
     created_at: datetime

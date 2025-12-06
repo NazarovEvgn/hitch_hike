@@ -21,6 +21,15 @@
       <q-list>
         <q-item-label header>Меню</q-item-label>
 
+        <q-item clickable :to="{ name: 'home' }">
+          <q-item-section avatar>
+            <q-icon name="home" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Главная</q-item-label>
+          </q-item-section>
+        </q-item>
+
         <q-item clickable :to="{ name: 'profile' }">
           <q-item-section avatar>
             <q-icon name="account_circle" />
