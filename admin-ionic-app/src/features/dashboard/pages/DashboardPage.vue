@@ -51,7 +51,7 @@
                 </ion-label>
               </ion-item>
 
-              <ion-item button detail>
+              <ion-item button detail @click="router.push('/services')">
                 <ion-icon slot="start" :icon="pricetagOutline" color="primary" />
                 <ion-label>
                   <h2>Услуги и цены</h2>
