@@ -2,621 +2,185 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Current Project Status
+## Важное примечание о языке общения
 
-**✅ Phase 1 Complete**: Backend infrastructure is implemented and database is ready.
-**✅ Phase 2 Complete**: Full REST API with all admin and client endpoints implemented.
-**✅ Phase 3 Complete**: Quasar Admin Panel with full authentication and core functionality tested.
-**✅ Phase 4 Complete**: Client PWA Application - 2GIS Map Integration
-**🔄 Phase 5 Started**: Migration to Ionic Framework + Tailwind CSS (Ionic projects created)
+**Всегда веди диалог с пользователем по-русски.** Код и комментарии на английском, но общение с пользователем — только на русском языке.
 
-**Backend (FastAPI):**
-- ✅ FastAPI backend with uv package manager
-- ✅ PostgreSQL database with all tables created (Docker port: 5433)
-- ✅ SQLAlchemy 2.0 async models with proper Enum handling
-- ✅ JWT authentication with user_type field (argon2 password hashing)
-- ✅ Pydantic validation schemas
-- ✅ Auth API endpoints (register/login for clients and business admins)
-- ✅ Admin API endpoints (35+ endpoints - profile, services, bookings, analytics, status updates)
-- ✅ Client API endpoints (businesses browsing, bookings, favorites)
-- ✅ Docker Compose setup (PostgreSQL on port 5433, Redis on 6379)
-- ✅ Database migrations with proper Enum values
-- ✅ Redis integration prepared
-- ✅ API documentation (see docs/api_endpoints.md)
+## Обзор проекта
 
-**Database:**
-- ✅ Test businesses added (BEAUTY_SALON, CAR_WASH types)
-  - ✅ "Familia" (2 locations: Менделеева 137к1, Чаркова 56)
-  - ✅ "Hollywood" (Тура 4/2)
-  - ✅ "Автомойка Тура", "Автомойка Пена" (Tyumen)
-- ✅ Test accounts: familia.mendeleeva@example.com / Familia123, familia.charkova@example.com / Familia123, hollywood.salon@example.com / Hollywood123
+**Lets** — платформа для отображения доступности сервисов в реальном времени (автомойки, шиномонтаж, СТО, салоны красоты, ателье) с интеграцией карт 2GIS.
 
-**Frontend - Quasar (Legacy, fully functional):**
-- ✅ **Admin Panel** (admin-app/) - http://localhost:9001
-  - ✅ Login page with JWT authentication
-  - ✅ Dashboard with status toggle
-  - ✅ Status update page (PRIMARY FEATURE)
-  - ✅ Services page - CRUD operations
-  - ✅ Bookings page - Status management
-  - ✅ Pinia store for auth state
-  - ✅ Axios with automatic JWT token refresh
-  - ✅ Tilda Sans fonts integrated
-- ✅ **Client PWA** (client-app/) - http://localhost:9002
-  - ✅ 2GIS MapGL integration with custom markers
-  - ✅ Color-coded availability markers (👍 emoji)
-  - ✅ Type filtering (car wash/repair/tire service)
-  - ✅ Business card with details
-  - ✅ Real-time status display
+**Целевой рынок:** Тюмень (MVP) → расширение на другие города
 
-**Frontend - Ionic (New, in development):**
-- ✅ **Admin Ionic App** (admin-ionic-app/) - http://localhost:5173
-  - ✅ Feature-Based Architecture implemented
-  - ✅ TypeScript + Pinia + Axios
-  - ✅ Auth, Dashboard, Status, Services, Bookings, Profile, Business Hours features
-  - ✅ Tilda Sans fonts integrated
-- 🔄 **Client Ionic App** (client-ionic-app/) - http://localhost:5173
-  - ✅ Basic structure with businesses feature
-  - ✅ Capacitor configured (PWA + native)
-  - 🔄 UI porting in progress
+**Ключевая цель:** Создать **лучшую на рынке** систему онлайн-записи, которая объединяет лучшие практики конкурентов + решает реальные потребности бизнеса и клиентов.
 
-**⚠️ Known Issue - Business Profile Not Loading in Header (Quasar Admin App):**
-- **Issue**: MainLayout header may not display business name and address after login
-- **Root Cause**: Pinia store initialization timing - fetchProfile() called before Pinia is ready
-- **Status**: Affects admin-app/ (Quasar), should be avoided in admin-ionic-app/ (Ionic)
-- **Workaround**: Fetch profile in onMounted() hook after component is fully initialized
-- **Backend Endpoint**: `/api/v1/admin/business/profile` (confirmed working)
-- **Files to review when fixing**:
-  - `admin-app/src/pages/LoginPage.vue` (login logic)
-  - `admin-app/src/layouts/MainLayout.vue` (header display)
-  - `admin-app/src/stores/auth.js` (fetchProfile method)
+**Уникальная особенность:** Статус "Свободны. Готовы принять" — инструмент для привлечения клиентов в периоды низкой загрузки сервиса.
 
-**Other Known Issues & Solutions:**
-- ⚠️ **PostgreSQL Port Conflict**: If you have local PostgreSQL 17 installed, Docker uses port 5433 instead of 5432
-- ✅ **Fixed**: Enum values now use lowercase (car_wash, not CAR_WASH) via `values_callable`
-- ✅ **Fixed**: Password hashing switched from bcrypt to argon2-cffi for better compatibility
-- ✅ **Fixed**: JWT tokens now include `user_type` field for business_admin authentication
-- ✅ **Fixed**: LoginPage uses direct API calls to avoid Pinia initialization timing issues
-- ✅ **Fixed**: CORS configured for multiple dev server ports (9000, 9001, 9002, 3000)
-- ✅ **Fixed**: DashboardPage endpoint changed from `/admin/status` to `/admin/status/current` (405 error resolved)
+## Пользовательские сценарии
 
-**✅ Phase 4 Complete:** Client PWA Application - 2GIS Map Integration
-- ✅ **Quasar PWA project created** (client-app/) - http://localhost:9002
-  - ✅ Project structure with pages, routing, axios configured
-  - ✅ MapPage with filter panel and business card UI
-  - ✅ FavoritesPage and ErrorNotFound pages
-  - ✅ PWA manifest and service worker setup
-  - ✅ **2GIS MapGL integration** (branch: feature/2gis-map-integration)
-- ✅ **2GIS map display with custom HTML markers**
-  - ✅ Color-coded markers: 🟢 Green (available), 🟡 Orange (busy), 🔴 Red (very busy)
-  - ✅ Emoji thumbs-up (👍) markers for better visibility
-  - ✅ Custom marker styling with borders and shadows
-- ✅ **Load and display businesses from API** via `/businesses/nearby`
-  - ✅ Real-time status display (estimated wait time, queue count)
-  - ✅ Automatic map updates when businesses change
-- ✅ **Business card with detailed information**
-  - ✅ Click on marker to show business details
-  - ✅ Display: name, address, phone, status, wait time
-  - ✅ Action buttons: Call, Book (placeholder)
-- ✅ **Type filtering** (car wash/repair shop/tire service)
-  - ✅ Filter buttons hide/show markers by business type
-- ✅ **2GIS API key configuration** in quasar.config.js
-- ✅ **VPN troubleshooting documentation** added
-- ✅ **Real businesses added**: Автомойка Тура, Автомойка Пена (Tyumen)
-- ✅ **Precise geolocation** from 2GIS URLs (lat/lon extraction)
-- 🔄 Online booking form (placeholder - to be implemented)
-- 🔄 Favorites functionality (placeholder - to be implemented)
+**Путь клиента (Consumer App):**
+1. Открыть приложение (смартфон или PWA)
+2. Найти нужный сервис на карте или через систему поиска
+3. Открыть карточку сервиса
+4. Оформить онлайн-запись на интересующую услугу
 
-**✅ REBRANDING COMPLETE (December 6, 2025):**
-Project successfully rebranded from "ХичХайк (HitchHike)" to "Lets"
+**Путь бизнеса (Business App):**
+1. Оформить подписку (бизнес-модель)
+2. Зарегистрировать сервис(ы) и заполнить информацию
+3. Работать через админ-панель:
+   - Принимать и управлять онлайн-записями
+   - Объявлять услуги, цены и акции
+   - Выставлять статус "Свободны" для привлечения клиентов
 
-**What was done:**
-- ✅ Updated all documentation (dev_concept.md, dev_plan.md, README.md, CLAUDE.md)
-- ✅ Changed domains: хичхайк.рф → lets.app, api.хичхайк.рф → api.lets.app, admin.хичхайк.рф → admin.lets.app
-- ✅ Renamed database: hitchhike_db → lets_db (user: lets, password: lets)
-- ✅ Updated backend files: pyproject.toml (lets-backend), alembic.ini, main.py (Lets API)
-- ✅ Updated frontend packages: admin-app (lets-admin), client-app (lets-client)
-- ✅ Recreated Docker containers: hitchhike_postgres → lets_postgres, hitchhike_redis → lets_redis
-- ✅ Created database backup: database_backup_20251206_203126.sql (36KB)
-- ✅ Restored all data to new database (3 businesses, 3 admins, 1 service, 1 booking)
-- ✅ Updated backend/.env with new DATABASE_URL (postgresql+asyncpg://lets:lets@127.0.0.1:5433/lets_db)
-- ✅ GitHub repository renamed: hitch_hike → lets-app (https://github.com/NazarovEvgn/lets-app)
-- ✅ Backend server restarted and working with new database
-- ✅ All commits pushed to main branch
+**Целевая аудитория:**
+- Обе стороны используют преимущественно **смартфоны**
+- Также доступна PWA версия для браузера
 
-**Repository:** https://github.com/NazarovEvgn/lets-app
-
-**Test credentials** (still valid after rebrand):
-- familia.mendeleeva@example.com / Familia123
-- familia.charkova@example.com / Familia123
-- hollywood.salon@example.com / Hollywood123
-
-**🔄 Phase 5 (In Progress):** Migration to Ionic Framework + Tailwind CSS
-
-**Decision rationale:**
-- Both admin and client apps will be used primarily on smartphones
-- Quasar has good PWA support but design feels dated (Material Design ~2020)
-- Ionic Framework provides modern native mobile UX (iOS 17 / Material Design 3)
-- Tailwind CSS adds flexibility for custom components and brand styling
-
-**Current Status:**
-- ✅ Ionic projects created (admin-ionic-app/ and client-ionic-app/)
-- ✅ Tailwind CSS v4 installed and configured
-- ✅ Capacitor configured in client-ionic-app (PWA + native)
-- ✅ Feature-Based Architecture implemented in admin-ionic-app
-  - ✅ auth feature (LoginPage, authStore)
-  - ✅ dashboard feature (DashboardPage)
-  - ✅ business-status feature (StatusUpdatePage, statusStore, statusService)
-  - ✅ services feature (ServicesListPage, ServiceFormModal, servicesStore, servicesApiService)
-  - ✅ bookings feature (BookingsListPage, BookingDetailsModal, bookingsStore, bookingsApiService)
-  - ✅ profile feature (ProfilePage, profileStore, profileApiService)
-  - ✅ business-hours feature (BusinessHoursPage, businessHoursStore, businessHoursApiService)
-- ✅ Feature-Based Architecture started in client-ionic-app
-  - ✅ businesses feature (MapPage, FavoritesPage, businessesStore, businessesApiService)
-- ✅ Core infrastructure (api client, config, router)
-- 🔄 UI porting from Quasar apps in progress
-
-**Technology stack:**
-- **Ionic Framework 8.x** - Native mobile components
-- **Vue 3.3+ Composition API** - Same as current apps
-- **Tailwind CSS 4.x** - Utility-first styling
-- **Capacitor 7.x** - PWA + Native capabilities (client app only)
-- **TypeScript 5.9** - Type safety
-- **Vite 5.x** - Build tool
-- **Pinia** - State management (to be added)
-- **Axios** - HTTP client with JWT (to be added)
-
-**Architecture:** Feature-Based Architecture
-- Each business feature (auth, bookings, services, employees, business-status, profile) is a self-contained module
-- Feature structure: `components/`, `stores/`, `services/`, `pages/`, `types/`
-- Shared components and utilities in `shared/` directory
-- Core infrastructure (API, router, config) in `core/` directory
-- No Atomic Design - keeping it simple and pragmatic
-
-**Implemented Feature Structure (admin-ionic-app):**
-```
-admin-ionic-app/src/
-├── features/               # Feature-Based Architecture (IMPLEMENTED)
-│   ├── auth/
-│   │   ├── pages/         # LoginPage.vue
-│   │   ├── stores/        # authStore.ts (Pinia)
-│   │   └── types/         # TypeScript interfaces
-│   ├── dashboard/
-│   │   └── pages/         # DashboardPage.vue
-│   ├── business-status/
-│   │   ├── pages/         # StatusUpdatePage.vue
-│   │   ├── stores/        # statusStore.ts
-│   │   ├── services/      # statusService.ts (API calls)
-│   │   └── types/         # TypeScript interfaces
-│   ├── services/
-│   │   ├── pages/         # ServicesListPage.vue
-│   │   ├── components/    # ServiceFormModal.vue
-│   │   ├── stores/        # servicesStore.ts
-│   │   ├── services/      # servicesApiService.ts
-│   │   └── types/         # TypeScript interfaces
-│   ├── bookings/
-│   │   ├── pages/         # BookingsListPage.vue
-│   │   ├── components/    # BookingDetailsModal.vue
-│   │   ├── stores/        # bookingsStore.ts
-│   │   ├── services/      # bookingsApiService.ts
-│   │   └── types/         # TypeScript interfaces
-│   ├── profile/
-│   │   ├── pages/         # ProfilePage.vue
-│   │   ├── stores/        # profileStore.ts
-│   │   ├── services/      # profileApiService.ts
-│   │   └── types/         # TypeScript interfaces
-│   └── business-hours/
-│       ├── pages/         # BusinessHoursPage.vue
-│       ├── stores/        # businessHoursStore.ts
-│       ├── services/      # businessHoursApiService.ts
-│       └── types/         # TypeScript interfaces
-├── core/                   # Infrastructure
-│   ├── api/               # client.ts (Axios with JWT)
-│   ├── config/            # index.ts (API base URL)
-│   └── router/            # index.ts (Vue Router)
-└── theme/                  # Ionic CSS variables, Tilda Sans fonts
-
-client-ionic-app/src/
-├── features/               # Feature-Based Architecture (IN PROGRESS)
-│   └── businesses/
-│       ├── pages/         # MapPage.vue, FavoritesPage.vue
-│       ├── stores/        # businessesStore.ts
-│       ├── services/      # businessesApiService.ts
-│       └── types/         # TypeScript interfaces
-└── core/                   # Infrastructure (same as admin-ionic-app)
-```
-
-**Note:** The shared/ directory will be added when common components emerge during development.
-
-**Phase 6 (Next):** Additional Features & Production Deployment
-- Online booking form (no registration required for clients)
-- Favorites functionality (localStorage)
-- WebSocket for real-time status updates
-- Complete remaining admin features (Promotions, Analytics, Advanced Profile)
-- Production deployment with Capacitor PWA
-- Optional: Native iOS/Android builds via Capacitor
-
-## Project Overview
-
-**Lets** - Real-Time Service Availability Platform for auto service businesses (car washes, repair shops, tire services, beauty salons) integrated with 2GIS maps.
-
-**Brand:** Lets
-**Domains:**
-- lets.app (client PWA application)
-- api.lets.app (backend API)
-- admin.lets.app (admin panel)
-
-**Logo:** 👍 Thumbs up icon with color-coded availability:
-- 🟢 Green = available (0-15 min wait)
-- 🟡 Yellow = busy (15-30 min wait)
-- 🟠 Orange = very busy (30+ min wait)
-
-**Key Value Proposition**: Show real-time service availability on a map when clients need the service right now.
-
-**Target Market**: Tyumen, Russia (initial MVP launch) → expand to other cities
-
-**MVP Focus (Minimum Viable Product):**
-
-For business owners:
-1. Register business and add to map
-2. Add services with prices
-3. **PRIMARY FEATURE:** Update availability status (green/yellow/orange)
-4. View and manage online bookings
-5. Get reminders to update status
-
-For clients (NO registration required):
-1. Select service type (car wash, repair shop, tire service)
-2. View map with color-coded availability markers
-3. Click on marker → see info + 3 actions:
-   - 📞 Call (direct tel: link)
-   - 📝 Book online (simple form, no account needed)
-   - 🗺️ Navigate (redirect to 2GIS with route)
-
-**Business Model**:
-- Free for clients (no registration required for MVP)
-- Subscription for businesses (~1000-3000 RUB/month)
-- 3-month free trial for initial businesses in Tyumen
-
-**Hosting Cost**: ~500₽/month (Timeweb Cloud VPS)
-
-**Success Metrics:**
-- Admins update status minimum 2x/day
-- View → booking conversion: 10-15%
-- 15-20+ businesses onboarded in Tyumen
-
-## User Personas
-
-### 1. Clients (Mobile/Web)
-- Browse services on 2GIS map with real-time availability
-- See wait times instead of "overloaded" status
-- Online booking
-- Filter by price, services, promotions
-- Favorites and notifications
-- Discount incentive for indicating "came through app"
-
-### 2. Business Administrators (Desktop/PC)
-- Admin panel with real-time data updates
-- Update availability status (with sound/visual reminders)
-- Manage bookings from the app
-- Publish services, prices, promotions
-- Track effectiveness metrics (views, bookings through app)
-
-## Core Technical Decisions
-
-### 2GIS Integration
-- API documentation: https://dev.2gis.ru/en/api
-- Used for map display and service location database
-- Visual markers indicating availability (green = low load, with estimated wait time)
-
-### Platform Architecture
-- **Client apps**: Web (PWA recommended for MVP) + Mobile (iOS/Android for Phase 2)
-- **Admin apps**: Desktop (Electron.js) or Web application
-- **Real-time updates**: WebSocket or Server-Sent Events for availability status
-
-### Known Challenges & Solutions
-
-1. **Admin discipline (updating status)**
-   - Onboarding with business owner
-   - Sound/visual reminders in app
-
-2. **Reluctance to show high load**
-   - Display "approximate wait time 30 min" instead of "overloaded"
-   - Positive framing
-
-3. **Tracking app effectiveness**
-   - Prompt clients for "came through app" with discount incentive
-   - Analytics dashboard showing views → bookings conversion
-   - Weekly email reports to business owners
-
-## MVP Strategy (Tyumen Launch)
-
-**Phase 1 Goals:**
-- Onboard 15-20+ services in each category (car wash, repair)
-- 3-month free trial period
-- Build service density before client acquisition
-
-**Phase 2 Goals:**
-- Launch client acquisition campaigns
-- Validate retention after free trial ends
-- Expand to other cities via online marketing
-
-**Success Metrics:**
-- Admin status update frequency: minimum 2x/day
-- View → booking conversion: target 10-15%
-- Retention after trial: target 40%+
-
-## Development Priorities
-
-### MVP (Phase 1)
-1. Web application for clients
-2. Admin panel (desktop/web)
-3. 2GIS map integration
-4. Basic booking system
-5. Admin reminder/notification system
-
-### Post-MVP (Phase 2)
-1. Mobile apps (iOS/Android)
-2. Push notifications
-3. Promo code system
-4. Business analytics dashboard
-
-## Technology Stack
-
-### Backend
-- **FastAPI 0.110+** (Python 3.11+) with **uv** package manager
-- PostgreSQL 15+ with SQLAlchemy 2.0 (async)
-- Redis 7+ for caching
-- WebSocket for real-time updates
-- JWT authentication
-
-### Frontend
-- **Quasar Framework 2.x** (Vue 3 + PWA)
-- Pinia for state management
-- 2GIS Maps API 3.0 integration
-- Axios for HTTP requests
-
-### Hosting
-- **Timeweb Cloud VPS** (Ubuntu 22.04)
-  - Тариф: Cloud VPS Start (2GB RAM, 1 vCPU, 20GB SSD)
-  - Цена: ~500₽/мес
-  - URL: https://timeweb.cloud/
-- Nginx reverse proxy
-- SSL via Let's Encrypt (бесплатно)
-- Домены: lets.app, api.lets.app, admin.lets.app
-
-## Development Commands
-
-### Backend (FastAPI)
-```bash
-# Setup
-cd backend
-uv venv && .venv\Scripts\activate  # Windows
-uv pip install -e .
-
-# Configure environment
-cp .env.example .env
-# Edit .env with your settings (especially SECRET_KEY and DGIS_API_KEY)
-
-# Database (using Docker)
-cd ..
-docker-compose up -d  # Start PostgreSQL and Redis
-
-# Development
-cd backend
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000  # Run dev server
-
-# Database migrations (if needed)
-# Note: Manual migration already applied. For new migrations:
-alembic revision --autogenerate -m "description"
-alembic upgrade head
-
-# Testing
-pytest  # Run tests (when implemented)
-
-# Code quality
-ruff check .   # Lint
-black .        # Format
-```
-
-**Important Notes:**
-- Database schema is already created via manual migration in `alembic/versions/20251129_1220_initial_migration.py`
-- If you encounter asyncpg connection issues on Windows, the database can be managed directly via Docker exec
-- API documentation available at: http://localhost:8000/docs
-- When creating new migrations, always review autogenerated code for Enum handling
-- Use `uv run` prefix for all Python commands to ensure correct virtual environment
-
-### Frontend (Quasar - Legacy)
-
-**Admin Panel (Quasar)** - http://localhost:9001:
-```bash
-cd admin-app
-npm install
-npm run dev                            # Run dev server
-npm run lint                           # Lint
-npm run format                         # Format
-quasar build -m pwa                    # Build for production
-```
-
-**Client PWA (Quasar)** - http://localhost:9002:
-```bash
-cd client-app
-npm install
-npm run dev                            # Run dev server
-quasar build -m pwa                    # Build for production
-```
-
-### Frontend (Ionic - New)
-
-**Admin Ionic App** - http://localhost:5173 (default Vite port):
-```bash
-cd admin-ionic-app
-npm install
-npm run dev                            # Run dev server (Vite)
-npm run build                          # Build for production
-npm run lint                           # Lint
-npm run test:unit                      # Run unit tests (Vitest)
-npm run test:e2e                       # Run E2E tests (Cypress)
-```
-
-**Client Ionic App** - http://localhost:5173 (default Vite port):
-```bash
-cd client-ionic-app
-npm install
-npm run dev                            # Run dev server (Vite)
-npm run build                          # Build for production
-
-# Capacitor (PWA + Native)
-npx cap sync                           # Sync web assets to native platforms
-npx cap open ios                       # Open iOS project in Xcode
-npx cap open android                   # Open Android project in Android Studio
-```
-
-### Database
-```bash
-createdb lets_db                       # Create database
-psql lets_db                           # Connect to database
-```
-
-## Project Structure
+## Архитектура проекта
 
 ```
 lets-app/
-├── backend/                    # FastAPI application (http://localhost:8000)
+├── api/                    # Backend FastAPI (порт 8000)
 │   ├── app/
-│   │   ├── api/v1/            # API endpoints
-│   │   │   ├── auth.py        # Auth endpoints (register/login for clients and admins)
-│   │   │   ├── admin.py       # Admin endpoints (profile, services, bookings, status)
-│   │   │   ├── businesses.py  # Client endpoints (browse businesses, nearby search)
-│   │   │   ├── bookings.py    # Booking management
-│   │   │   └── favorites.py   # Favorites management
-│   │   ├── models/            # SQLAlchemy 2.0 async models
-│   │   ├── schemas/           # Pydantic validation schemas
-│   │   ├── services/          # Business logic
-│   │   └── core/              # Core utilities (auth, DB, config)
-│   ├── alembic/               # Database migrations
-│   └── tests/                 # Tests (to be implemented)
+│   │   ├── api/v1/        # API endpoints
+│   │   ├── models/        # SQLAlchemy 2.0 async модели
+│   │   ├── schemas/       # Pydantic схемы
+│   │   ├── core/          # Конфигурация, БД, безопасность
+│   │   └── main.py        # Точка входа FastAPI
+│   ├── alembic/           # Миграции БД
+│   └── pyproject.toml     # Зависимости (uv)
 │
-├── admin-app/                 # ✅ Quasar Admin Panel (http://localhost:9001) - LEGACY
+├── business/              # Ionic приложение для бизнеса (порт 5173)
 │   ├── src/
-│   │   ├── pages/             # Vue pages (Login, Dashboard, Status, etc.)
-│   │   ├── layouts/           # MainLayout with navigation
-│   │   ├── stores/            # Pinia stores (auth)
-│   │   ├── boot/              # Axios configuration with JWT
-│   │   ├── router/            # Vue Router with auth guards
-│   │   └── css/               # Styles (Tilda Sans fonts)
-│   └── quasar.config.js       # Quasar configuration
+│   │   ├── features/      # Feature-Based Architecture
+│   │   ├── core/          # API client, config
+│   │   ├── router/        # Vue Router
+│   │   └── theme/         # Ionic CSS, шрифты Tilda Sans
+│   └── package.json
 │
-├── client-app/                # ✅ Quasar Client PWA (http://localhost:9002) - LEGACY
+├── consumer/              # Ionic приложение для клиентов (порт 5174)
 │   ├── src/
-│   │   ├── pages/             # MapPage, FavoritesPage
-│   │   ├── stores/            # Pinia stores
-│   │   ├── boot/              # Axios + 2GIS MapGL setup
-│   │   └── router/            # Vue Router
-│   └── quasar.config.js       # Quasar + 2GIS API key config
+│   │   ├── features/      # Feature-Based Architecture
+│   │   ├── core/          # API client, config
+│   │   ├── router/        # Vue Router
+│   │   └── theme/         # Ionic CSS, шрифты
+│   ├── capacitor.config.ts  # Capacitor (PWA + native)
+│   └── package.json
 │
-├── admin-ionic-app/           # 🔄 Ionic Admin App (TypeScript + Vue 3 + Tailwind)
-│   ├── src/
-│   │   ├── features/          # Feature-Based Architecture (IMPLEMENTED)
-│   │   │   ├── auth/         # LoginPage, authStore
-│   │   │   ├── dashboard/    # DashboardPage
-│   │   │   ├── business-status/  # StatusUpdatePage, statusStore, statusService
-│   │   │   ├── services/     # ServicesListPage, ServiceFormModal, servicesStore, servicesApiService
-│   │   │   ├── bookings/     # BookingsListPage, BookingDetailsModal, bookingsStore, bookingsApiService
-│   │   │   ├── profile/      # ProfilePage, profileStore, profileApiService
-│   │   │   └── business-hours/   # BusinessHoursPage, businessHoursStore, businessHoursApiService
-│   │   ├── core/              # API client, config, router
-│   │   ├── router/            # Vue Router
-│   │   └── theme/             # Ionic CSS variables, Tilda Sans fonts
-│   ├── vite.config.ts         # Vite configuration
-│   └── ionic.config.json      # Ionic CLI configuration
-│
-├── client-ionic-app/          # 🔄 Ionic Client App (TypeScript + Vue 3 + Tailwind + Capacitor)
-│   ├── src/
-│   │   ├── features/          # Feature-Based Architecture (IN PROGRESS)
-│   │   │   └── businesses/   # MapPage, FavoritesPage, businessesStore, businessesApiService
-│   │   ├── core/              # API client, config, router
-│   │   ├── router/            # Vue Router
-│   │   └── theme/             # Ionic CSS variables + Tailwind
-│   ├── capacitor.config.ts    # Capacitor configuration (PWA + native)
-│   ├── vite.config.ts         # Vite configuration
-│   └── ionic.config.json      # Ionic CLI configuration
-│
-├── fonts/                     # Source font files (Tilda Sans)
-│
-└── docs/
-    ├── dev_concept.md         # Business concept (Russian)
-    ├── dev_plan.md            # Development plan (Russian)
-    └── api_endpoints.md       # API documentation
+└── docker-compose.yml     # PostgreSQL (5433) + Redis (6379)
 ```
 
-See **docs/dev_plan.md** for detailed technical stack, architecture, and development workflow.
+## Технологический стек
 
-## Key Implementation Notes
+**Backend (api/):**
+- FastAPI 0.110+ с пакетным менеджером **uv**
+- PostgreSQL 17 (asyncpg через SQLAlchemy 2.0)
+- Redis 7 для кэширования
+- JWT аутентификация (argon2-cffi для хэширования)
+- Alembic для миграций
+- **Push Notifications:** Firebase Cloud Messaging (FCM) или OneSignal
+- **SMS Gateway:** SMS.ru или аналоги (Twilio для международного)
+- **Email:** SMTP или SendGrid/Mailgun
 
-**Backend API Architecture:**
-- **FastAPI** with async/await pattern throughout
-- **SQLAlchemy 2.0** with async engine (asyncpg driver)
-- **JWT Authentication** with separate flows for clients and business admins
-  - Token payload includes `user_type` field ("client" or "business_admin")
-  - Access tokens expire in 30 minutes, refresh tokens in 7 days
-- **Password Hashing:** argon2-cffi (switched from bcrypt for Windows compatibility)
-- **Database Enums:** Use lowercase values via `values_callable` (e.g., "car_wash" not "CAR_WASH")
-- **API Versioning:** All endpoints under `/api/v1/`
-- **CORS:** Configured for multiple dev server ports (9000, 9001, 9002, 3000, 5173)
-- **API Endpoints:**
-  - `/api/v1/auth/*` - Registration and login for clients and business admins
-  - `/api/v1/admin/*` - Business profile, services, bookings, status management (requires business_admin auth)
-  - `/api/v1/businesses/*` - Browse businesses, nearby search (public or client auth)
-  - `/api/v1/bookings/*` - Booking management
-  - `/api/v1/favorites/*` - Favorites management
+**Frontend (business/ и consumer/):**
+- Ionic Framework 8.x + Vue 3.3 Composition API
+- TypeScript 5.9 с строгой типизацией
+- Tailwind CSS 4.x
+- Pinia для state management
+- Axios для HTTP запросов
+- Vite 5.x для сборки
+- 2GIS MapGL API (только в consumer/)
+- Capacitor 7.x для PWA/native:
+  - `@capacitor/push-notifications` - Push уведомления
+  - `@capacitor/local-notifications` - Локальные напоминания
+  - `@capacitor/app` - Lifecycle hooks
+  - PWA в consumer/, опционально в business/
 
-**Admin Panel (admin-app/ - Quasar):**
-- **Framework:** Quasar 2.x with Vue 3 Composition API
-- **Authentication:** JWT with automatic token refresh via Axios interceptors
-- **State Management:** Pinia store for auth state
-- **Routing:** Protected routes with navigation guards (requires Pinia initialized first)
-- **Fonts:** Tilda Sans with all weight variations (Light to Black + Variable Font)
-- **Development Server:** http://localhost:9001
-- **Key Pages:**
-  - LoginPage - JWT authentication
-  - DashboardPage - Quick actions and overview
-  - StatusPage - PRIMARY FEATURE for updating business availability
-  - Services/Bookings/Promotions/Analytics/Profile - Placeholder pages
+**Архитектурный подход:**
+- Feature-Based Architecture (не Atomic Design)
+- Каждая фича — самодостаточный модуль с `pages/`, `components/`, `stores/`, `services/`, `types/`
+- Общие компоненты в `shared/`
+- Инфраструктура в `core/`
 
-**2GIS Maps Integration (to be implemented in client-app):**
-- Frontend: 2GIS JavaScript API 3.0 (`@2gis/mapgl`)
-- Custom markers: 👍 thumbs up icon with color-coded availability
-- Color scheme: Green (available), Yellow (busy), Orange (very busy)
+## Команды для разработки
 
-**Real-time Updates (to be implemented):**
-- FastAPI WebSocket endpoints for status updates
-- Client subscribes to business status changes
-- Admin receives notifications for new bookings
+### Backend (api/)
 
-**PWA Features:**
-- Installable on mobile devices (lets.app)
-- Offline support via service workers
-- Push notifications capability
-
-**Authentication:**
-- JWT tokens (access + refresh)
-- Separate auth flows for clients and business admins
-- Password hashing with argon2 (more secure and compatible than bcrypt)
-- Token storage in localStorage
-- Automatic refresh on 401 errors
-
-## Environment Variables
-
-Backend requires `.env` file (created from `.env.example`):
 ```bash
-# Database (use 127.0.0.1 instead of localhost on Windows)
-# Note: Docker PostgreSQL runs on port 5433 to avoid conflict with local PostgreSQL 17
+# Запуск Docker сервисов (PostgreSQL + Redis)
+docker-compose up -d
+docker ps  # Проверка: lets_postgres, lets_redis
+
+# Настройка окружения (первый раз)
+cd api
+uv venv && .venv\Scripts\activate  # Windows
+uv pip install -e .
+cp .env.example .env
+# Отредактировать .env (DATABASE_URL, SECRET_KEY, DGIS_API_KEY)
+
+# Запуск dev сервера
+cd api
+uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+# API docs: http://localhost:8000/docs
+
+# Миграции БД
+cd api
+uv run alembic upgrade head                          # Применить миграции
+uv run alembic revision --autogenerate -m "message"  # Создать миграцию
+
+# Проверка кода
+cd api
+uv run ruff check .   # Линтинг
+uv run black .        # Форматирование
+```
+
+**Важно:**
+- Всегда используй `uv run` перед Python командами
+- PostgreSQL работает на порту **5433** (не 5432) чтобы избежать конфликта с локальным PostgreSQL 17
+- Используй `127.0.0.1` вместо `localhost` в DATABASE_URL на Windows
+- Проверяй автогенерированные миграции для Enum (должны использовать lowercase значения)
+
+### Frontend - Business App (business/)
+
+```bash
+cd business
+npm install
+npm run dev      # Dev server на http://localhost:5173
+npm run build    # Production build
+npm run lint     # ESLint
+```
+
+### Frontend - Consumer App (consumer/)
+
+```bash
+cd consumer
+npm install
+npm run dev      # Dev server на http://localhost:5174 (другой порт!)
+npm run build    # Production build
+
+# Capacitor (PWA + native)
+npx cap sync           # Синхронизация с native платформами
+npx cap open ios       # Открыть в Xcode
+npx cap open android   # Открыть в Android Studio
+```
+
+**Важно:**
+- `business` работает на порту 5173, `consumer` на 5174 (избегаем конфликта)
+- Оба приложения используют Feature-Based Architecture
+- Pinia ДОЛЖНА быть инициализирована в `main.ts` ДО монтирования приложения
+
+## Переменные окружения
+
+**api/.env** (создать из `.env.example`):
+```bash
+# Database (использовать 127.0.0.1 вместо localhost на Windows)
 DATABASE_URL=postgresql+asyncpg://lets:lets@127.0.0.1:5433/lets_db
 
 # Redis
 REDIS_URL=redis://localhost:6379/0
 
-# JWT - IMPORTANT: Generate a secure key!
-# Use: python -c "import secrets; print(secrets.token_urlsafe(32))"
+# JWT - ОБЯЗАТЕЛЬНО сгенерировать безопасный ключ!
+# python -c "import secrets; print(secrets.token_urlsafe(32))"
 SECRET_KEY=your-generated-secure-key-here
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
@@ -626,144 +190,289 @@ REFRESH_TOKEN_EXPIRE_DAYS=7
 DGIS_API_KEY=your-2gis-api-key-here
 
 # CORS
-ALLOWED_ORIGINS=http://localhost:9000,http://localhost:9001,http://localhost:3000
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174,http://localhost:3000
 
 # Environment
 ENVIRONMENT=development
 ```
 
-**Security Note**: Never commit `.env` file to Git. Always generate a new SECRET_KEY for production.
+**business/.env**:
+```bash
+VITE_API_BASE_URL=http://localhost:8000/api/v1
+```
 
-## Brand Colors & Design System
+**consumer/.env**:
+```bash
+VITE_API_BASE_URL=http://localhost:8000/api/v1
+VITE_DGIS_API_KEY=your-2gis-api-key-here
+```
 
-**Primary Colors:**
-- **Purple**: `#27126A` - Primary brand color (buttons, headers, markers)
-- **Green**: `#98EA14` - Accent color (availability indicator, success states)
+## Ключевые архитектурные решения
 
-**Status Colors (Availability):**
-- 🟢 **Green** (#98EA14 or similar) - Available (0-15 min wait)
-- 🟡 **Yellow/Orange** - Busy (15-30 min wait)
-- 🔴 **Red** - Very busy (30+ min wait)
+### Backend API
 
-**Map Markers:**
-- Base: Purple circle (#27126A)
-- Available indicator: Small green circle (#98EA14) on border
-- Icon: 👍 Thumbs up emoji
+- **Async/await** везде (FastAPI + SQLAlchemy 2.0 async)
+- **JWT Authentication** с разделением клиентов и админов бизнеса:
+  - Токен включает поле `user_type` ("client" или "business_admin")
+  - Access token: 30 минут, Refresh token: 7 дней
+- **Password Hashing:** argon2-cffi (лучше bcrypt для Windows)
+- **Database Enums:** Lowercase значения через `values_callable` (например, "car_wash", не "CAR_WASH")
+- **API Versioning:** Все endpoints под `/api/v1/`
+- **CORS:** Настроен для портов 5173, 5174, 3000, 9000-9002
 
-**Typography:**
-- **Font Family**: Tilda Sans (all weights: Light to Black + Variable Font)
-- Located in: `fonts/` directory
-- Integrated in: admin-app/public/fonts/ and admin-app/src/css/
+**API Endpoints:**
+- `/api/v1/auth/*` - Регистрация и вход для клиентов и бизнес-админов
+- `/api/v1/admin/*` - Управление профилем, услугами, записями, статусом (требует business_admin auth)
+- `/api/v1/businesses/*` - Просмотр сервисов, поиск рядом (публичный или client auth)
+- `/api/v1/bookings/*` - Управление записями
+- `/api/v1/favorites/*` - Управление избранным
 
-**Ionic/Tailwind Configuration:**
-- Define CSS variables in `src/theme/variables.css` (Ionic)
-- Brand colors applied via CSS custom properties:
-  ```css
-  --ion-color-primary: #27126A;        /* Purple */
-  --ion-color-primary-rgb: 39,18,106;
-  --ion-color-secondary: #98EA14;      /* Green */
-  --ion-color-secondary-rgb: 152,234,20;
-  ```
-- Tilda Sans fonts loaded via `theme/fonts.css` in admin-ionic-app
-- Use Ionic components for consistent mobile UX
-- Tailwind extended with brand colors in `tailwind.config.js`
+### Frontend (Ionic Apps)
 
-## Language Notes
+**Feature-Based Architecture:**
+```
+src/
+├── features/
+│   └── auth/              # Пример фичи
+│       ├── pages/         # LoginPage.vue
+│       ├── components/    # (при необходимости)
+│       ├── stores/        # authStore.ts (Pinia)
+│       ├── services/      # authApiService.ts (API calls)
+│       └── types/         # index.ts (TypeScript interfaces)
+├── core/
+│   ├── api/client.ts      # Axios с JWT interceptors
+│   ├── config/index.ts    # API_BASE_URL
+│   └── router/            # (может быть в корне src/)
+├── shared/                # Общие компоненты
+└── theme/                 # Ionic variables, fonts
+```
 
-- Primary documentation: Russian (docs/dev_concept.md, docs/dev_plan.md)
-- Code and comments: English recommended
-- UI for Russian market: Russian language
-- Database/API naming: English conventions
+**TypeScript:**
+- Строгая типизация всех API ответов
+- Интерфейсы в `types/` каждой фичи
+- Pinia stores с типизированным state/getters/actions
+- Vue 3 Composition API с `<script setup lang="ts">`
 
----
+**API Client:**
+- Axios сконфигурирован в `core/api/client.ts`
+- JWT токен автоматически добавляется через interceptor
+- Base URL из `core/config/index.ts`
+- Автоматический refresh токена на 401 (в планах)
 
-## Quick Start Guide
+### Pinia Store Initialization
 
-**Starting the full stack:**
+**КРИТИЧЕСКИ ВАЖНО:**
+```typescript
+// main.ts - ПРАВИЛЬНЫЙ порядок
+const pinia = createPinia()
 
-1. **Start Docker services (PostgreSQL + Redis):**
-   ```bash
-   docker-compose up -d
-   docker ps  # Verify: lets_postgres (healthy), lets_redis (healthy)
-   ```
+const app = createApp(App)
+  .use(IonicVue)
+  .use(pinia)   // СНАЧАЛА Pinia
+  .use(router)  // ПОТОМ router
 
-2. **Start backend API:**
-   ```bash
-   cd backend
-   uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-   # API docs: http://localhost:8000/docs
-   ```
+router.isReady().then(() => {
+  app.mount('#app')
+})
+```
 
-3. **Start frontend (choose one):**
-   ```bash
-   # Option A: Quasar Admin Panel (legacy, fully functional)
-   cd admin-app
-   npm run dev  # http://localhost:9001
+Pinia ДОЛЖНА быть инициализирована ДО роутера и монтирования приложения!
 
-   # Option B: Ionic Admin App (new, recommended for development)
-   cd admin-ionic-app
-   npm run dev  # http://localhost:5173
+## Брендинг и дизайн
 
-   # Option C: Quasar Client PWA (legacy, fully functional)
-   cd client-app
-   npm run dev  # http://localhost:9002
+**Основные цвета:**
+- **Фиолетовый (Purple):** `#27126A` - основной цвет (кнопки, заголовки, маркеры на карте)
+- **Зеленый (Green):** `#98EA14` - акцент (индикатор доступности, успех)
 
-   # Option D: Ionic Client App (new, in development)
-   cd client-ionic-app
-   npm run dev  # http://localhost:5173
-   ```
+**Статусы доступности:**
+- 🟢 Зеленый (#98EA14) - Свободен (0-15 мин ожидания)
+- 🟡 Желтый/Оранжевый - Занят (15-30 мин)
+- 🔴 Красный - Очень занят (30+ мин)
 
-**Test credentials:**
+**Маркеры на карте:**
+- База: фиолетовый круг (#27126A)
+- Индикатор доступности: маленький зеленый круг (#98EA14) на границе
+- Иконка: 👍 эмодзи "палец вверх"
+
+**Типографика:**
+- **Шрифт:** Tilda Sans (все начертания: Light до Black + Variable Font)
+- Шрифты загружаются через `theme/fonts.css`
+
+**Ionic/Tailwind настройка:**
+```css
+/* src/theme/variables.css */
+--ion-color-primary: #27126A;        /* Purple */
+--ion-color-primary-rgb: 39,18,106;
+--ion-color-secondary: #98EA14;      /* Green */
+--ion-color-secondary-rgb: 152,234,20;
+```
+
+**Дизайн-концепция:**
+- **Современный дизайн** уровня последних трендов (2024-2025)
+- **Liquid Glass** (глассморфизм) - для карточек, модальных окон
+- **Минималистичные чистые формы** - без визуального шума
+- **Фокус на мобильный UX** - приоритет смартфонам, затем PWA
+- Референсы: современные banking apps, премиум сервисы
+
+## Требования к продукту
+
+### Система онлайн-записи (core feature)
+
+**Пошаговый workflow для клиента:**
+1. **Шаг 1: Выбор сервиса** - карта/поиск → карточка с фото и информацией
+2. **Шаг 2: Выбор услуги** - список активных услуг с ценами
+3. **Шаг 3: Выбор мастера** - доступные специалисты для выбранной услуги
+4. **Шаг 4: Выбор времени** - свободные слоты в удобном формате
+5. **Подтверждение** - резюме записи + контакты клиента
+
+**Профиль сервиса должен содержать:**
+- Название, адрес, телефон
+- Фотографии (галерея, минимум 3-5 качественных фото)
+- График работы
+- Список услуг с ценами
+- Список мастеров с фото и специализацией
+- Активные акции (если есть)
+- Рейтинг и отзывы (в планах)
+- Статус доступности в реальном времени
+
+### Надежность и коммуникация
+
+**Обязательные каналы уведомлений:**
+- ✅ **Push-уведомления** (через Capacitor Push Notifications)
+  - Клиенту: подтверждение записи, напоминание за 1 час
+  - Бизнесу: новая запись, отмена записи
+- ✅ **SMS-уведомления** (интеграция SMS-шлюза, например, SMS.ru)
+  - Дублирование критичных уведомлений
+  - Подтверждение записи с кодом
+- ✅ **Email-уведомления** (опционально)
+  - Резюме записи с деталями
+  - Напоминания
+
+**Принципы надежности:**
+- Двойное подтверждение записи (клиент + бизнес)
+- Автоматические напоминания
+- История всех операций
+- Возможность отмены/переноса записи
+
+## Быстрый старт
+
+**1. Запустить Docker сервисы:**
+```bash
+docker-compose up -d
+docker ps  # Проверка: lets_postgres (healthy), lets_redis (healthy)
+```
+
+**2. Запустить backend API:**
+```bash
+cd api
+uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+# API docs: http://localhost:8000/docs
+```
+
+**3. Запустить frontend (выбрать нужное):**
+```bash
+# Business приложение (админка)
+cd business
+npm run dev  # http://localhost:5173
+
+# Consumer приложение (клиентское)
+cd consumer
+npm run dev  # http://localhost:5174
+```
+
+**Тестовые учетные записи:**
 - familia.mendeleeva@example.com / Familia123
 - familia.charkova@example.com / Familia123
 - hollywood.salon@example.com / Hollywood123
 
-**Important files:**
-- Database backup: `database_backup_20251206_203126.sql` (keep for safety)
-- Backend .env: Contains DATABASE_URL, SECRET_KEY, DGIS_API_KEY (not in git)
-- Working directory: `C:\Projects\lets-app`
-
----
-
-## Common Issues & Solutions
+## Типичные проблемы и решения
 
 **PostgreSQL Port Conflict:**
-- Docker PostgreSQL runs on port **5433** (not 5432) to avoid conflict with local PostgreSQL 17
-- Update DATABASE_URL in backend/.env: `postgresql+asyncpg://lets:lets@127.0.0.1:5433/lets_db`
+- Docker PostgreSQL работает на порту **5433** (не 5432)
+- Обновить DATABASE_URL в api/.env: `postgresql+asyncpg://lets:lets@127.0.0.1:5433/lets_db`
 
 **Pinia Store Initialization Timing:**
-- Always ensure Pinia is created before accessing stores
-- In Quasar apps, use `boot` files for initialization
-- In Ionic apps, initialize in `main.ts` before mounting the app
-- **CRITICAL for Ionic apps:** Pinia stores MUST be initialized in main.ts with `app.use(createPinia())` BEFORE the app is mounted
-- Feature stores should use `defineStore` and be imported lazily to avoid circular dependencies
+- ВСЕГДА инициализируй Pinia в `main.ts` с `app.use(createPinia())` ДО монтирования
+- Фичи должны использовать `defineStore` и импортироваться лениво
 
-**2GIS Map Integration (Client App):**
-- Requires API key in quasar.config.js or environment variables
-- May require VPN if 2GIS services are blocked in your region
-- Custom HTML markers use emoji thumbs-up (👍) with color-coded borders
+**2GIS Map Integration (Consumer App):**
+- Требует API ключ в `.env` (VITE_DGIS_API_KEY)
+- Может потребоваться VPN если 2GIS заблокирован в вашем регионе
+- Кастомные HTML маркеры используют эмодзи 👍 с цветными границами
 
 **Alembic Migrations:**
-- Always use `uv run alembic` instead of plain `alembic`
-- Review autogenerated migrations for Enum handling (should use lowercase values)
-- Manual migration already exists - only create new ones for schema changes
+- Всегда используй `uv run alembic` вместо просто `alembic`
+- Проверяй автогенерированные миграции для Enum (должны использовать lowercase)
+- Ручная миграция уже существует - создавай новые только для изменений схемы
 
 **Windows-Specific Issues:**
-- Use `127.0.0.1` instead of `localhost` for database connections
-- Use `.venv\Scripts\activate` (not `source .venv/bin/activate`)
-- argon2-cffi works better than bcrypt for password hashing on Windows
+- Используй `127.0.0.1` вместо `localhost` для подключения к БД
+- Используй `.venv\Scripts\activate` (не `source .venv/bin/activate`)
+- argon2-cffi работает лучше чем bcrypt для хэширования паролей на Windows
 
-**TypeScript in Ionic Apps:**
-- All Ionic apps use TypeScript 5.9 with strict type checking
-- API responses should have proper TypeScript interfaces defined in feature `types/` directories
-- Pinia stores should be strongly typed with proper state/getters/actions interfaces
-- Use Vue 3 Composition API with `<script setup lang="ts">` syntax
-- Import Ionic components from `@ionic/vue` with proper TypeScript types
+**TypeScript в Ionic Apps:**
+- Все Ionic приложения используют TypeScript 5.9 со строгой проверкой типов
+- API ответы должны иметь TypeScript интерфейсы в `types/` директориях фич
+- Pinia stores должны быть строго типизированы
+- Используй Vue 3 Composition API с `<script setup lang="ts">`
+- Импортируй Ionic компоненты из `@ionic/vue` с правильными TypeScript типами
 
-**API Client in Ionic Apps:**
-- Axios client configured in `src/core/api/client.ts` with JWT token interceptors
-- Base URL configured in `src/core/config/index.ts` (default: http://localhost:8000/api/v1)
-- Feature services (e.g., `servicesApiService.ts`) use the shared API client
-- Token automatically attached to requests via interceptor
-- Automatic token refresh on 401 errors (to be implemented)
-- Error handling with proper TypeScript error types
+## Текущий статус проекта
+
+**✅ Завершено:**
+- Backend API с JWT аутентификацией
+- PostgreSQL БД с миграциями
+- Docker Compose setup
+- Ionic проекты для business и consumer
+- Feature-Based Architecture
+- Tailwind CSS 4.x интеграция
+- Capacitor настроен в consumer (PWA + native)
+
+**🔄 В процессе:**
+- Перенос UI из старых Quasar приложений в Ionic
+- Современный дизайн (Liquid Glass, минимализм)
+- Интеграция 2GIS карт в consumer app
+
+**📋 В планах (Priority):**
+
+**Система онлайн-записи (Core Feature):**
+- ✅ Пошаговый workflow: Сервис → Услуга → Мастер → Время → Подтверждение
+- ✅ Профиль сервиса с фотографиями (галерея 3-5 фото)
+- ✅ Управление слотами времени для мастеров
+- ✅ История записей и возможность отмены/переноса
+
+**Надежность и коммуникация:**
+- ✅ Push-уведомления (Capacitor Push + FCM/OneSignal)
+- ✅ SMS-уведомления (SMS.ru gateway)
+- ✅ Email-уведомления (SendGrid/SMTP)
+- ✅ Автоматические напоминания клиентам за 1 час
+- ✅ Уведомления бизнесу о новых/отмененных записях
+
+**Дополнительные фичи:**
+- Система избранного (localStorage)
+- WebSocket для real-time обновлений статуса
+- Аналитика для бизнеса (просмотры, конверсия записей)
+- Система акций и промо-кодов
+- Рейтинги и отзывы
+
+**Deployment:**
+- Production deployment (Timeweb Cloud VPS)
+- Native iOS/Android сборки через Capacitor
+
+## Дополнительная документация
+
+- `docs/dev_concept.md` - Бизнес концепция (на русском)
+- `docs/dev_plan.md` - План разработки (на русском)
+- `README.md` - Общее описание проекта
+- API docs: http://localhost:8000/docs (когда запущен backend)
+
+## Важные файлы для резервного копирования
+
+- `database_backup_20251206_203126.sql` - Резервная копия БД (36KB)
+- `api/.env` - Настройки окружения (НЕ в git, содержит SECRET_KEY)
+- `business/.env` - Frontend конфиг (НЕ в git)
+- `consumer/.env` - Frontend конфиг (НЕ в git)
+
+**Рабочая директория:** `C:\Projects\lets-app`
+
+**GitHub Repository:** https://github.com/NazarovEvgn/lets-app
