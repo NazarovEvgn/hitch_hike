@@ -66,6 +66,14 @@
                   <p>Настройки бизнеса</p>
                 </ion-label>
               </ion-item>
+
+              <ion-item button detail @click="router.push('/business-hours')">
+                <ion-icon slot="start" :icon="timeOutline" color="primary" />
+                <ion-label>
+                  <h2>Часы работы</h2>
+                  <p>Расписание на неделю</p>
+                </ion-label>
+              </ion-item>
             </ion-list>
           </ion-card-content>
         </ion-card>

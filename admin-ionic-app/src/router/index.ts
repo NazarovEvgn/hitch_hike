@@ -43,6 +43,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/features/profile/pages/ProfilePage.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/business-hours',
+    name: 'BusinessHours',
+    component: () => import('@/features/business-hours/pages/BusinessHoursPage.vue'),
+    meta: { requiresAuth: true },
+  },
   // Fallback для неизвестных роутов
   {
     path: '/:pathMatch(.*)*',
