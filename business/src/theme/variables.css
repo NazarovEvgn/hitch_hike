@@ -125,3 +125,9 @@ body {
   --ion-color-step-900: #191919;
   --ion-color-step-950: #0d0d0d;
 }
+
+/* Современное закругление углов для карточек (как в Headless UI) */
+ion-card {
+  border-radius: 12px;
+  overflow: hidden;
+}

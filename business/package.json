@@ -12,6 +12,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@headlessui/vue": "^1.7.23",
     "@ionic/vue": "^8.0.0",
     "@ionic/vue-router": "^8.0.0",
     "axios": "^1.13.2",
