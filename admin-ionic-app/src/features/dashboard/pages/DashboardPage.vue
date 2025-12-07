@@ -43,7 +43,7 @@
                 </ion-label>
               </ion-item>
 
-              <ion-item button detail>
+              <ion-item button detail @click="router.push('/bookings')">
                 <ion-icon slot="start" :icon="calendarOutline" color="primary" />
                 <ion-label>
                   <h2>Онлайн-записи</h2>
