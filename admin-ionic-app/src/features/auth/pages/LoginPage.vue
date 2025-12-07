@@ -4,9 +4,7 @@
       <div class="login-container">
         <!-- Лого и заголовок -->
         <div class="login-header">
-          <div class="logo">👍</div>
-          <h1 class="ion-text-center">Lets Admin</h1>
-          <p class="ion-text-center subtitle">Панель управления</p>
+          <h1 class="ion-text-center">Lets</h1>
         </div>
 
         <!-- Форма входа -->
@@ -19,7 +17,6 @@
                 <ion-input
                   v-model="email"
                   type="email"
-                  placeholder="example@mail.ru"
                   required
                   autocomplete="email"
                 />
@@ -31,7 +28,6 @@
                 <ion-input
                   v-model="password"
                   :type="showPassword ? 'text' : 'password'"
-                  placeholder="Введите пароль"
                   required
                   autocomplete="current-password"
                 />
@@ -149,62 +145,61 @@ async function handleLogin() {
   justify-content: center;
   align-items: center;
   min-height: 100%;
-  padding: 20px;
+  padding: 24px;
 }
 
 .login-header {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
   text-align: center;
-}
-
-.logo {
-  font-size: 4rem;
-  margin-bottom: 1rem;
 }
 
 h1 {
   color: var(--ion-color-primary);
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-.subtitle {
-  color: var(--ion-color-medium);
-  font-size: 1rem;
+  font-weight: 700;
+  font-size: 2.5rem;
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .login-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   margin: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
 }
 
 .error-message {
   display: block;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  border-radius: 4px;
-  background-color: var(--ion-color-danger-tint);
+  margin-bottom: 1.5rem;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background-color: rgba(235, 68, 90, 0.1);
+  border-left: 3px solid var(--ion-color-danger);
 }
 
 .error-message p {
   margin: 0;
   font-size: 0.9rem;
+  color: var(--ion-color-danger);
 }
 
 .login-button {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   --background: var(--ion-color-primary);
+  --border-radius: 8px;
+  height: 48px;
   font-weight: 600;
+  font-size: 1rem;
 }
 
-.register-link {
-  color: var(--ion-color-primary);
-  text-decoration: none;
-  font-weight: 600;
+ion-item {
+  --border-radius: 8px;
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
 }
 
-.register-link:hover {
-  text-decoration: underline;
+ion-label {
+  font-weight: 500;
 }
 </style>
