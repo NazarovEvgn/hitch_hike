@@ -2,14 +2,19 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-menu-button></ion-menu-button>
-        </ion-buttons>
         <ion-title>Профиль</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content :fullscreen="true">
+      <!-- Back Button -->
+      <div class="back-button-container">
+        <ion-button fill="clear" size="small" @click="$router.back()">
+          <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
+          Назад
+        </ion-button>
+      </div>
+
       <!-- Loading -->
       <div v-if="profileStore.loading && !profileStore.business" class="loading-container">
         <ion-spinner name="crescent"></ion-spinner>
@@ -147,6 +152,14 @@
           Попробовать снова
         </ion-button>
       </div>
+
+      <!-- Back to Home Button -->
+      <div class="back-to-home-container">
+        <ion-button expand="block" fill="outline" color="medium" @click="$router.push('/dashboard')">
+          <ion-icon slot="start" :icon="homeOutline"></ion-icon>
+          На главную
+        </ion-button>
+      </div>
     </ion-content>
   </ion-page>
 </template>
@@ -157,8 +170,6 @@ import {
   IonPage,
   IonHeader,
   IonToolbar,
-  IonButtons,
-  IonMenuButton,
   IonTitle,
   IonContent,
   IonInput,
@@ -170,7 +181,7 @@ import {
   IonSpinner,
   toastController,
 } from '@ionic/vue'
-import { alertCircleOutline } from 'ionicons/icons'
+import { alertCircleOutline, arrowBackOutline, homeOutline } from 'ionicons/icons'
 import { useProfileStore } from '../stores/profileStore'
 import type { BusinessUpdateInput } from '../types'
 
@@ -332,6 +343,16 @@ async function handleSubmit() {
 .coordinate-value {
   font-weight: 600;
   color: var(--ion-color-dark);
+}
+
+.back-button-container {
+  padding: 8px 16px;
+}
+
+.back-to-home-container {
+  padding: 24px 16px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .submit-button {

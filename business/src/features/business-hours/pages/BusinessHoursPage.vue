@@ -2,14 +2,19 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-menu-button></ion-menu-button>
-        </ion-buttons>
         <ion-title>Часы работы</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content :fullscreen="true">
+      <!-- Back Button -->
+      <div class="back-button-container">
+        <ion-button fill="clear" size="small" @click="$router.back()">
+          <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
+          Назад
+        </ion-button>
+      </div>
+
       <!-- Loading -->
       <div v-if="businessHoursStore.loading && schedules.length === 0" class="loading-container">
         <ion-spinner name="crescent"></ion-spinner>
@@ -116,6 +121,14 @@
             </ul>
           </ion-card-content>
         </ion-card>
+
+        <!-- Back to Home Button -->
+        <div class="back-to-home-container">
+          <ion-button expand="block" fill="outline" color="medium" @click="$router.push('/dashboard')">
+            <ion-icon slot="start" :icon="homeOutline"></ion-icon>
+            На главную
+          </ion-button>
+        </div>
       </div>
     </ion-content>
   </ion-page>
@@ -127,8 +140,6 @@ import {
   IonPage,
   IonHeader,
   IonToolbar,
-  IonButtons,
-  IonMenuButton,
   IonTitle,
   IonContent,
   IonList,
@@ -142,7 +153,7 @@ import {
   IonSpinner,
   toastController,
 } from '@ionic/vue'
-import { copyOutline } from 'ionicons/icons'
+import { copyOutline, arrowBackOutline, homeOutline } from 'ionicons/icons'
 import { useBusinessHoursStore } from '../stores/businessHoursStore'
 import type { DaySchedule } from '../types'
 
@@ -255,6 +266,14 @@ async function saveSchedule() {
 </script>
 
 <style scoped>
+.back-button-container {
+  padding: 8px 16px;
+}
+
+.back-to-home-container {
+  padding: 24px 0;
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;

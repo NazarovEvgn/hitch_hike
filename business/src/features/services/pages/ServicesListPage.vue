@@ -2,9 +2,6 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-menu-button></ion-menu-button>
-        </ion-buttons>
         <ion-title>Услуги</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="openCreateModal">
@@ -15,6 +12,14 @@
     </ion-header>
 
     <ion-content :fullscreen="true">
+      <!-- Back Button -->
+      <div class="back-button-container">
+        <ion-button fill="clear" size="small" @click="$router.back()">
+          <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
+          Назад
+        </ion-button>
+      </div>
+
       <!-- Loading State -->
       <div v-if="servicesStore.loading && servicesStore.services.length === 0" class="loading-container">
         <ion-spinner name="crescent"></ion-spinner>
@@ -76,6 +81,14 @@
           </ion-item-options>
         </ion-item-sliding>
       </ion-list>
+
+      <!-- Back to Home Button -->
+      <div class="back-to-home-container">
+        <ion-button expand="block" fill="outline" color="medium" @click="$router.push('/dashboard')">
+          <ion-icon slot="start" :icon="homeOutline"></ion-icon>
+          На главную
+        </ion-button>
+      </div>
     </ion-content>
 
     <!-- Service Form Modal -->
@@ -95,7 +108,6 @@ import {
   IonHeader,
   IonToolbar,
   IonButtons,
-  IonMenuButton,
   IonButton,
   IonTitle,
   IonContent,
@@ -118,6 +130,8 @@ import {
   timeOutline,
   createOutline,
   trashOutline,
+  arrowBackOutline,
+  homeOutline,
 } from 'ionicons/icons'
 import { useServicesStore } from '../stores/servicesStore'
 import ServiceFormModal from '../components/ServiceFormModal.vue'
@@ -252,6 +266,14 @@ async function handleDelete(id: number) {
 </script>
 
 <style scoped>
+.back-button-container {
+  padding: 8px 16px;
+}
+
+.back-to-home-container {
+  padding: 24px 16px;
+}
+
 /* Loading & Empty States */
 .loading-container,
 .empty-state {

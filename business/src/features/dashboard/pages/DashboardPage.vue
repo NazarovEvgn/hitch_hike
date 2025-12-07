@@ -2,9 +2,6 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-menu-button />
-        </ion-buttons>
         <ion-title>{{ businessName || 'Dashboard' }}</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="handleLogout">
@@ -111,7 +108,6 @@ import {
   IonIcon,
   IonButtons,
   IonButton,
-  IonMenuButton,
 } from '@ionic/vue'
 import {
   logOutOutline,

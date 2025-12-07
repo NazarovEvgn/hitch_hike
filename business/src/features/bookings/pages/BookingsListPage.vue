@@ -2,9 +2,6 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-menu-button></ion-menu-button>
-        </ion-buttons>
         <ion-title>Онлайн-записи</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="fetchBookings()">
@@ -15,6 +12,14 @@
     </ion-header>
 
     <ion-content :fullscreen="true">
+      <!-- Back Button -->
+      <div class="back-button-container">
+        <ion-button fill="clear" size="small" @click="$router.back()">
+          <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
+          Назад
+        </ion-button>
+      </div>
+
       <!-- Filter -->
       <div class="filter-container ion-padding">
         <ion-segment v-model="selectedStatus" @ion-change="handleFilterChange">
@@ -107,6 +112,14 @@
           </ion-item-options>
         </ion-item-sliding>
       </ion-list>
+
+      <!-- Back to Home Button -->
+      <div class="back-to-home-container">
+        <ion-button expand="block" fill="outline" color="medium" @click="$router.push('/dashboard')">
+          <ion-icon slot="start" :icon="homeOutline"></ion-icon>
+          На главную
+        </ion-button>
+      </div>
     </ion-content>
 
     <!-- Details Modal -->
@@ -126,7 +139,6 @@ import {
   IonHeader,
   IonToolbar,
   IonButtons,
-  IonMenuButton,
   IonButton,
   IonTitle,
   IonContent,
@@ -152,6 +164,8 @@ import {
   checkmarkOutline,
   checkmarkDoneOutline,
   closeOutline,
+  arrowBackOutline,
+  homeOutline,
 } from 'ionicons/icons'
 import { useBookingsStore } from '../stores/bookingsStore'
 import BookingDetailsModal from '../components/BookingDetailsModal.vue'
@@ -243,6 +257,14 @@ async function handleStatusUpdate(bookingId: number, newStatus: BookingStatus) {
 </script>
 
 <style scoped>
+.back-button-container {
+  padding: 8px 16px;
+}
+
+.back-to-home-container {
+  padding: 24px 16px;
+}
+
 .filter-container {
   padding: 12px 16px;
   background: var(--ion-color-light);

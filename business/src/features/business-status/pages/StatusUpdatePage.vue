@@ -2,14 +2,19 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-buttons slot="start">
-          <ion-menu-button></ion-menu-button>
-        </ion-buttons>
         <ion-title>Обновление статуса</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content :fullscreen="true" class="ion-padding">
+      <!-- Back Button -->
+      <div class="back-button-container">
+        <ion-button fill="clear" size="small" @click="$router.back()">
+          <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
+          Назад
+        </ion-button>
+      </div>
+
       <!-- Status Selection Card -->
       <ion-card>
         <ion-card-header>
@@ -70,6 +75,14 @@
           </p>
         </ion-card-content>
       </ion-card>
+
+      <!-- Back to Home Button -->
+      <div class="back-to-home-container">
+        <ion-button expand="block" fill="outline" color="medium" @click="$router.push('/dashboard')">
+          <ion-icon slot="start" :icon="homeOutline"></ion-icon>
+          На главную
+        </ion-button>
+      </div>
     </ion-content>
   </ion-page>
 </template>
@@ -80,8 +93,6 @@ import {
   IonPage,
   IonHeader,
   IonToolbar,
-  IonButtons,
-  IonMenuButton,
   IonTitle,
   IonContent,
   IonCard,
@@ -92,9 +103,11 @@ import {
   IonLabel,
   IonInput,
   IonButton,
+  IonIcon,
   IonSpinner,
   toastController,
 } from '@ionic/vue'
+import { arrowBackOutline, homeOutline } from 'ionicons/icons'
 import { useStatusStore } from '../stores/statusStore'
 import type { BusinessStatus } from '../types'
 
@@ -168,6 +181,14 @@ async function handleUpdateStatus() {
 </script>
 
 <style scoped>
+.back-button-container {
+  padding: 0 0 16px 0;
+}
+
+.back-to-home-container {
+  padding: 24px 0;
+}
+
 /* Status Buttons Grid */
 .status-buttons {
   display: grid;
