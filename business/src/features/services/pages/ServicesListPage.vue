@@ -38,16 +38,20 @@
               <div class="service-header">
                 <div class="service-info">
                   <h3>{{ service.name }}</h3>
-                  <p v-if="service.description" class="service-description">
-                    {{ service.description }}
-                  </p>
                 </div>
-                <ion-toggle
-                  :checked="service.is_active"
-                  @ion-change="toggleActive(service.id)"
-                  color="success"
-                ></ion-toggle>
+                <div class="service-toggle">
+                  <ion-toggle
+                    :checked="service.is_active"
+                    @ion-change="toggleActive(service.id)"
+                    color="success"
+                  ></ion-toggle>
+                </div>
               </div>
+
+              <!-- Service Description -->
+              <p v-if="service.description" class="service-description">
+                {{ service.description }}
+              </p>
 
               <!-- Service Details -->
               <div class="service-details">
@@ -362,9 +366,9 @@ async function handleDeleteFromModal() {
 .service-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .service-info {
@@ -372,16 +376,24 @@ async function handleDeleteFromModal() {
 }
 
 .service-info h3 {
-  margin: 0 0 4px 0;
+  margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--ion-color-dark);
 }
 
+.service-toggle {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .service-description {
-  margin: 0;
+  margin: 0 0 12px 0;
   font-size: 0.9rem;
   color: var(--ion-color-medium);
+  white-space: pre-line;
+  line-height: 1.4;
 }
 
 .service-details {
