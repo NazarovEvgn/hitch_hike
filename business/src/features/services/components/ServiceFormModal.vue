@@ -35,6 +35,12 @@
           ></ion-textarea>
         </ion-item>
 
+        <!-- Photo Upload -->
+        <div class="form-item photo-upload-container">
+          <label class="photo-label">Фотография услуги</label>
+          <PhotoUpload v-model="formData.photo_url" label="Добавить фото услуги" />
+        </div>
+
         <!-- Price Fields - Range (default) -->
         <div v-if="!isFixedPrice" class="row">
           <ion-item lines="none" class="form-item col">
@@ -145,6 +151,7 @@ import {
 } from '@ionic/vue'
 import { closeOutline, trashOutline } from 'ionicons/icons'
 import type { Service, ServiceFormData } from '../types'
+import PhotoUpload from '@/shared/components/PhotoUpload.vue'
 
 interface Props {
   isOpen: boolean
@@ -167,6 +174,7 @@ const formData = ref<ServiceFormData>({
   price_from: 0,
   price_to: 0,
   duration_minutes: 30,
+  photo_url: null,
   is_active: true,
 })
 
@@ -200,6 +208,7 @@ watch(
         price_from: newService.price_from,
         price_to: newService.price_to,
         duration_minutes: newService.duration_minutes,
+        photo_url: newService.photo_url || null,
         is_active: newService.is_active,
       }
       // Always start with range fields (checkbox unchecked)
@@ -212,6 +221,7 @@ watch(
         price_from: 0,
         price_to: 0,
         duration_minutes: 30,
+        photo_url: null,
         is_active: true,
       }
       isFixedPrice.value = false
@@ -280,6 +290,19 @@ ion-label[position='stacked'] {
 /* Toggle Item */
 .toggle-item ion-label {
   margin-right: auto;
+}
+
+/* Photo Upload Container */
+.photo-upload-container {
+  margin-bottom: 16px;
+}
+
+.photo-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  color: var(--ion-color-dark);
 }
 
 /* Price Container */

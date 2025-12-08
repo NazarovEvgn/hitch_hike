@@ -36,7 +36,7 @@
             <div class="service-card">
               <!-- Service Photo -->
               <div v-if="service.photo_url" class="service-photo">
-                <img :src="service.photo_url" :alt="service.name" />
+                <img :src="getPhotoUrl(service.photo_url)" :alt="service.name" />
               </div>
               <div v-else class="service-photo-placeholder">
                 <ion-icon :icon="imageOutline" size="large"></ion-icon>
@@ -174,6 +174,15 @@ function formatPriceRange(priceFrom: number, priceTo: number): string {
   }
 
   return `${formatter.format(priceFrom)} - ${formatter.format(priceTo)}`
+}
+
+// Get full photo URL
+function getPhotoUrl(photoUrl: string | null): string {
+  if (!photoUrl) return ''
+  // If it's already a full URL, return as is
+  if (photoUrl.startsWith('http')) return photoUrl
+  // Otherwise prepend API base URL
+  return `${import.meta.env.VITE_API_BASE_URL.replace('/api/v1', '')}${photoUrl}`
 }
 
 // Open create modal
