@@ -76,6 +76,14 @@
             Сохранить
           </ion-button>
         </div>
+
+        <!-- Delete Button (Only in Edit Mode) -->
+        <div v-if="isEditMode" class="delete-button-container">
+          <ion-button expand="block" color="danger" fill="outline" @click="handleDelete">
+            <ion-icon slot="start" :icon="trashOutline"></ion-icon>
+            Удалить услугу
+          </ion-button>
+        </div>
       </form>
     </ion-content>
   </ion-modal>
@@ -98,7 +106,7 @@ import {
   IonToggle,
   IonIcon,
 } from '@ionic/vue'
-import { closeOutline } from 'ionicons/icons'
+import { closeOutline, trashOutline } from 'ionicons/icons'
 import type { Service, ServiceFormData } from '../types'
 
 interface Props {
@@ -109,6 +117,7 @@ interface Props {
 interface Emits {
   (e: 'close'): void
   (e: 'save', formData: ServiceFormData): void
+  (e: 'delete'): void
 }
 
 const props = defineProps<Props>()
@@ -172,6 +181,10 @@ function handleSubmit() {
     ...formData.value,
   })
 }
+
+function handleDelete() {
+  emit('delete')
+}
 </script>
 
 <style scoped>
@@ -205,5 +218,12 @@ ion-label[position='stacked'] {
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-top: 24px;
+}
+
+/* Delete Button */
+.delete-button-container {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ion-color-light-shade);
 }
 </style>

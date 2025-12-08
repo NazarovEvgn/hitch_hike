@@ -52,8 +52,8 @@ function handleBack() {
 }
 
 .back-button {
-  margin: 0;
-  --padding-start: 0;
+  margin: 0 0 0 8px;
+  --padding-start: 4px;
   --padding-end: 0;
 }
 

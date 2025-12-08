@@ -1,32 +1,38 @@
 <template>
   <ion-page>
-    <AppHeader>
-      <template #actions>
-        <ion-button @click="openCreateModal">
-          <ion-icon slot="icon-only" :icon="addOutline" />
-        </ion-button>
-      </template>
-    </AppHeader>
+    <AppHeader />
 
     <ion-content :fullscreen="true">
       <PageNavigation page-title="Услуги" />
 
-      <!-- Loading State -->
-      <div v-if="servicesStore.loading && servicesStore.services.length === 0" class="loading-container">
-        <ion-spinner name="crescent"></ion-spinner>
-      </div>
+      <div class="content-container">
+        <!-- Loading State -->
+        <div v-if="servicesStore.loading && servicesStore.services.length === 0" class="loading-container">
+          <ion-spinner name="crescent"></ion-spinner>
+        </div>
 
-      <!-- Empty State -->
-      <div v-else-if="!servicesStore.loading && servicesStore.services.length === 0" class="empty-state">
-        <ion-icon :icon="pricetagOutline" size="large" color="medium"></ion-icon>
-        <p>Нет добавленных услуг</p>
-        <ion-button @click="openCreateModal">Добавить первую услугу</ion-button>
-      </div>
+        <!-- Empty State -->
+        <div v-else-if="!servicesStore.loading && servicesStore.services.length === 0" class="empty-state">
+          <ion-icon :icon="pricetagOutline" size="large" color="medium"></ion-icon>
+          <p>Нет добавленных услуг</p>
+          <ion-button @click="openCreateModal">Добавить первую услугу</ion-button>
+        </div>
 
-      <!-- Services List -->
-      <ion-list v-else>
+        <!-- Services Section -->
+        <div v-else>
+          <!-- Section Header -->
+          <div class="section-header">
+            <h2 class="section-title">Текущие услуги</h2>
+            <ion-button fill="clear" @click="openCreateModal" class="add-service-button">
+              <ion-icon slot="start" :icon="addOutline"></ion-icon>
+              Добавить услугу
+            </ion-button>
+          </div>
+
+          <!-- Services List -->
+          <ion-list>
         <ion-item-sliding v-for="service in servicesStore.services" :key="service.id">
-          <ion-item>
+          <ion-item button @click="openEditModal(service)">
             <div class="service-card">
               <!-- Service Header -->
               <div class="service-header">
@@ -71,14 +77,16 @@
             </ion-item-option>
           </ion-item-options>
         </ion-item-sliding>
-      </ion-list>
+          </ion-list>
+        </div>
 
-      <!-- Back to Home Button -->
-      <div class="back-to-home-container">
-        <ion-button expand="block" fill="outline" color="medium" @click="$router.push('/dashboard')">
-          <ion-icon slot="start" :icon="homeOutline"></ion-icon>
-          На главную
-        </ion-button>
+        <!-- Back to Home Button -->
+        <div class="back-to-home-container">
+          <ion-button expand="block" fill="outline" color="medium" @click="$router.push('/dashboard')">
+            <ion-icon slot="start" :icon="homeOutline"></ion-icon>
+            На главную
+          </ion-button>
+        </div>
       </div>
     </ion-content>
 
@@ -88,6 +96,7 @@
       :service="selectedService"
       @close="closeModal"
       @save="handleSave"
+      @delete="handleDeleteFromModal"
     />
   </ion-page>
 </template>
@@ -251,11 +260,65 @@ async function handleDelete(id: number) {
     await toast.present()
   }
 }
+
+// Handle delete from modal
+async function handleDeleteFromModal() {
+  if (!selectedService.value) return
+
+  const alert = await alertController.create({
+    header: 'Удаление услуги',
+    message: `Вы уверены, что хотите удалить "${selectedService.value.name}"?`,
+    buttons: [
+      {
+        text: 'Отмена',
+        role: 'cancel',
+      },
+      {
+        text: 'Удалить',
+        role: 'destructive',
+        handler: async () => {
+          await handleDelete(selectedService.value!.id)
+          closeModal()
+        },
+      },
+    ],
+  })
+
+  await alert.present()
+}
 </script>
 
 <style scoped>
+.content-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0;
+  gap: 12px;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.add-service-button {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  margin: 0;
+}
+
 .back-to-home-container {
-  padding: 24px 16px;
+  padding: 24px 0;
 }
 
 /* Loading & Empty States */
