@@ -22,10 +22,9 @@
         <div v-else>
           <!-- Section Header -->
           <div class="section-header">
-            <h2 class="section-title">Текущие услуги</h2>
             <ion-button fill="clear" @click="openCreateModal" class="add-service-button">
               <ion-icon slot="start" :icon="addOutline"></ion-icon>
-              Добавить услугу
+              Добавить
             </ion-button>
           </div>
 
@@ -333,7 +332,7 @@ async function handleDeleteFromModal() {
 /* Section Header */
 .section-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin: 16px 0;
   gap: 12px;

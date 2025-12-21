@@ -158,7 +158,7 @@ ion-content {
 }
 
 h1 {
-  color: var(--ion-color-primary);
+  color: #000000;
   font-weight: 700;
   font-size: 3rem;
   margin: 0;

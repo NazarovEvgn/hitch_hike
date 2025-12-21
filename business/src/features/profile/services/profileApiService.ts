@@ -14,7 +14,7 @@ export const profileApiService = {
    * Update business profile
    */
   async updateProfile(data: BusinessUpdateInput): Promise<Business> {
-    const response = await apiClient.put<Business>('/admin/business/profile', data)
+    const response = await apiClient.patch<Business>('/admin/business/profile', data)
     return response.data
   },
 }

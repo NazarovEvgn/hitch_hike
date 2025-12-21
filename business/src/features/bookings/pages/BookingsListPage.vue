@@ -23,9 +23,6 @@
           <ion-segment-button value="confirmed">
             <ion-label>Подтверждено</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="completed">
-            <ion-label>Завершено</ion-label>
-          </ion-segment-button>
         </ion-segment>
       </div>
 
@@ -65,9 +62,14 @@
                   <span>{{ booking.booking_time }}</span>
                 </div>
 
-                <div v-if="booking.service" class="detail-row">
+                <div class="detail-row">
                   <ion-icon :icon="pricetagOutline" color="primary"></ion-icon>
-                  <span>{{ booking.service.name }}</span>
+                  <span>{{ booking.service?.name || 'Услуга не указана' }}</span>
+                </div>
+
+                <div v-if="booking.employee" class="detail-row">
+                  <ion-icon :icon="personOutline" color="primary"></ion-icon>
+                  <span>Мастер: {{ booking.employee.name }}</span>
                 </div>
 
                 <div v-if="booking.came_through_app" class="detail-row">
@@ -148,6 +150,7 @@ import {
   timeOutline,
   pricetagOutline,
   phonePortraitOutline,
+  personOutline,
   checkmarkOutline,
   checkmarkDoneOutline,
   closeOutline,
@@ -252,6 +255,11 @@ async function handleStatusUpdate(bookingId: number, newStatus: BookingStatus) {
 .filter-container {
   padding: 12px 16px;
   background: var(--ion-color-light);
+}
+
+/* Уменьшенный шрифт для segment */
+ion-segment-button ion-label {
+  font-size: 0.8rem;
 }
 
 .loading-container,
