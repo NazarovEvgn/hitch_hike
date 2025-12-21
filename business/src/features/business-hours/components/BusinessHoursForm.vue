@@ -1,117 +1,103 @@
 <template>
-  <ion-page>
-    <AppHeader />
+  <div class="business-hours-form">
+    <!-- Loading -->
+    <div v-if="businessHoursStore.loading && schedules.length === 0" class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
 
-    <ion-content :fullscreen="true">
-      <PageNavigation page-title="Часы работы" />
+    <!-- Schedule Form -->
+    <div v-else>
+      <!-- Days List -->
+      <ion-list class="days-list">
+        <ion-item
+          v-for="(day, index) in schedules"
+          :key="index"
+          lines="full"
+          class="day-item"
+        >
+          <div class="day-content">
+            <!-- Day Name -->
+            <div class="day-name">{{ day.name }}</div>
 
-      <!-- Loading -->
-      <div v-if="businessHoursStore.loading && schedules.length === 0" class="loading-container">
-        <ion-spinner name="crescent"></ion-spinner>
-      </div>
+            <!-- Is Open Toggle -->
+            <div class="day-toggle">
+              <ion-toggle
+                v-model="day.isOpen"
+                @ionChange="validateDay(index)"
+                :enable-on-off-labels="true"
+              >
+                <span slot="label">{{ day.isOpen ? 'Работает' : 'Закрыто' }}</span>
+              </ion-toggle>
+            </div>
 
-      <!-- Schedule Form -->
-      <div v-else class="hours-form ion-padding">
-        <!-- Days List -->
-        <ion-list class="days-list">
-          <ion-item
-            v-for="(day, index) in schedules"
-            :key="index"
-            lines="full"
-            class="day-item"
-          >
-            <div class="day-content">
-              <!-- Day Name -->
-              <div class="day-name">{{ day.name }}</div>
-
-              <!-- Is Open Toggle -->
-              <div class="day-toggle">
-                <ion-toggle
-                  v-model="day.isOpen"
-                  @ionChange="validateDay(index)"
-                  :enable-on-off-labels="true"
-                >
-                  <span slot="label">{{ day.isOpen ? 'Работает' : 'Закрыто' }}</span>
-                </ion-toggle>
-              </div>
-
-              <!-- Time Inputs -->
-              <div v-if="day.isOpen" class="time-inputs">
-                <div class="time-input-group">
-                  <label>Открытие</label>
-                  <ion-button
-                    expand="block"
-                    fill="outline"
-                    @click="openTimePicker(index, 'open')"
-                    class="time-button"
-                  >
-                    {{ day.openTime || 'Выбрать' }}
-                  </ion-button>
-                </div>
-
-                <div class="time-input-group">
-                  <label>Закрытие</label>
-                  <ion-button
-                    expand="block"
-                    fill="outline"
-                    @click="openTimePicker(index, 'close')"
-                    class="time-button"
-                  >
-                    {{ day.closeTime || 'Выбрать' }}
-                  </ion-button>
-                </div>
-
-                <!-- Copy to All Button -->
+            <!-- Time Inputs -->
+            <div v-if="day.isOpen" class="time-inputs">
+              <div class="time-input-group">
+                <label>Открытие</label>
                 <ion-button
-                  fill="clear"
-                  size="small"
-                  @click="copyToAll(index)"
-                  class="copy-button"
+                  expand="block"
+                  fill="outline"
+                  @click="openTimePicker(index, 'open')"
+                  class="time-button"
                 >
-                  <ion-icon slot="icon-only" :icon="copyOutline"></ion-icon>
+                  {{ day.openTime || 'Выбрать' }}
                 </ion-button>
               </div>
 
-              <!-- Error Message -->
-              <div v-if="day.error" class="error-message">
-                {{ day.error }}
+              <div class="time-input-group">
+                <label>Закрытие</label>
+                <ion-button
+                  expand="block"
+                  fill="outline"
+                  @click="openTimePicker(index, 'close')"
+                  class="time-button"
+                >
+                  {{ day.closeTime || 'Выбрать' }}
+                </ion-button>
               </div>
+
+              <!-- Copy to All Button -->
+              <ion-button
+                fill="clear"
+                size="small"
+                @click="copyToAll(index)"
+                class="copy-button"
+              >
+                <ion-icon slot="icon-only" :icon="copyOutline"></ion-icon>
+              </ion-button>
             </div>
-          </ion-item>
-        </ion-list>
 
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-          <ion-button
-            expand="block"
-            fill="outline"
-            color="medium"
-            @click="resetSchedule"
-            :disabled="isSaving"
-          >
-            Сбросить
-          </ion-button>
+            <!-- Error Message -->
+            <div v-if="day.error" class="error-message">
+              {{ day.error }}
+            </div>
+          </div>
+        </ion-item>
+      </ion-list>
 
-          <ion-button
-            expand="block"
-            color="primary"
-            @click="saveSchedule"
-            :disabled="isSaving || hasErrors"
-          >
-            <ion-spinner v-if="isSaving" name="crescent"></ion-spinner>
-            <span v-else>Сохранить</span>
-          </ion-button>
-        </div>
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <ion-button
+          expand="block"
+          fill="outline"
+          color="medium"
+          @click="resetSchedule"
+          :disabled="isSaving"
+        >
+          Сбросить
+        </ion-button>
 
-        <!-- Back to Home Button -->
-        <div class="back-to-home-container">
-          <ion-button expand="block" fill="outline" color="medium" @click="$router.push('/dashboard')">
-            <ion-icon slot="start" :icon="homeOutline"></ion-icon>
-            На главную
-          </ion-button>
-        </div>
+        <ion-button
+          expand="block"
+          color="primary"
+          @click="saveSchedule"
+          :disabled="isSaving || hasErrors"
+        >
+          <ion-spinner v-if="isSaving" name="crescent"></ion-spinner>
+          <span v-else>Сохранить</span>
+        </ion-button>
       </div>
-    </ion-content>
+    </div>
 
     <!-- Time Picker Modal -->
     <ion-modal :is-open="isTimePickerOpen" @didDismiss="closeTimePicker">
@@ -137,14 +123,12 @@
         </ion-datetime>
       </ion-content>
     </ion-modal>
-  </ion-page>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import {
-  IonPage,
-  IonContent,
   IonList,
   IonItem,
   IonToggle,
@@ -156,14 +140,13 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
+  IonContent,
   IonDatetime,
   toastController,
 } from '@ionic/vue'
-import { copyOutline, homeOutline } from 'ionicons/icons'
+import { copyOutline } from 'ionicons/icons'
 import { useBusinessHoursStore } from '../stores/businessHoursStore'
 import type { DaySchedule } from '../types'
-import AppHeader from '@/shared/components/AppHeader.vue'
-import PageNavigation from '@/shared/components/PageNavigation.vue'
 
 const businessHoursStore = useBusinessHoursStore()
 
@@ -336,8 +319,8 @@ async function saveSchedule() {
 </script>
 
 <style scoped>
-.back-to-home-container {
-  padding: 24px 0;
+.business-hours-form {
+  width: 100%;
 }
 
 .loading-container {
@@ -345,15 +328,7 @@ async function saveSchedule() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  gap: 16px;
   padding: 24px;
-}
-
-.hours-form {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 16px;
 }
 
 .days-list {
@@ -448,7 +423,7 @@ async function saveSchedule() {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 /* Time Picker Modal Styles */

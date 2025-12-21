@@ -66,11 +66,11 @@
                 </ion-label>
               </ion-item>
 
-              <ion-item button detail @click="router.push('/business-hours')">
-                <ion-icon slot="start" :icon="timeOutline" color="primary" />
+              <ion-item button detail @click="router.push('/employees')">
+                <ion-icon slot="start" :icon="peopleOutline" color="primary" />
                 <ion-label>
-                  <h2>Часы работы</h2>
-                  <p>Расписание на неделю</p>
+                  <h2>Мастера</h2>
+                  <p>Управление персоналом</p>
                 </ion-label>
               </ion-item>
             </ion-list>
@@ -103,7 +103,7 @@ import {
   calendarOutline,
   pricetagOutline,
   personOutline,
-  timeOutline,
+  peopleOutline,
 } from 'ionicons/icons'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { useStatusStore } from '@/features/business-status/stores/statusStore'

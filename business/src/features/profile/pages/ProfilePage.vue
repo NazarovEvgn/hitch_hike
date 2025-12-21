@@ -132,6 +132,23 @@
             <span v-else>Сохранить изменения</span>
           </ion-button>
         </form>
+
+        <!-- Business Hours Accordion -->
+        <div class="hours-accordion-container">
+          <ion-accordion-group>
+            <ion-accordion value="business-hours">
+              <ion-item slot="header" color="light">
+                <ion-label>
+                  <h3>Часы работы</h3>
+                  <p>Настройте расписание работы</p>
+                </ion-label>
+              </ion-item>
+              <div class="ion-padding" slot="content">
+                <BusinessHoursForm />
+              </div>
+            </ion-accordion>
+          </ion-accordion-group>
+        </div>
       </div>
 
       <!-- Error State -->
@@ -166,6 +183,10 @@ import {
   IonButton,
   IonIcon,
   IonSpinner,
+  IonAccordion,
+  IonAccordionGroup,
+  IonItem,
+  IonLabel,
   toastController,
 } from '@ionic/vue'
 import { alertCircleOutline, homeOutline } from 'ionicons/icons'
@@ -173,6 +194,7 @@ import { useProfileStore } from '../stores/profileStore'
 import type { BusinessUpdateInput } from '../types'
 import AppHeader from '@/shared/components/AppHeader.vue'
 import PageNavigation from '@/shared/components/PageNavigation.vue'
+import BusinessHoursForm from '@/features/business-hours/components/BusinessHoursForm.vue'
 
 const profileStore = useProfileStore()
 
@@ -341,6 +363,10 @@ async function handleSubmit() {
 }
 
 .submit-button {
+  margin-top: 32px;
+}
+
+.hours-accordion-container {
   margin-top: 32px;
 }
 
