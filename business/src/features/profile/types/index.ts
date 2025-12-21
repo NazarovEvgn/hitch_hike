@@ -5,7 +5,7 @@ export interface Business {
   name: string
   business_type: BusinessType
   address: string
-  phone: string
+  phones: string[]
   email: string
   description?: string
   logo_url?: string
@@ -19,7 +19,7 @@ export interface BusinessUpdateInput {
   name: string
   business_type: BusinessType
   address: string
-  phone: string
+  phones: string[]
   description?: string
   logo_url?: string
 }

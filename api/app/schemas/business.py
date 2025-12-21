@@ -10,7 +10,7 @@ class BusinessBase(BaseModel):
     address: str
     lat: float
     lon: float
-    phone: str
+    phones: list[str]
     email: str | None = None
     description: str | None = None
 
@@ -26,7 +26,7 @@ class BusinessUpdate(BaseModel):
 
     name: str | None = None
     address: str | None = None
-    phone: str | None = None
+    phones: list[str] | None = None
     email: str | None = None
     description: str | None = None
     logo_url: str | None = None

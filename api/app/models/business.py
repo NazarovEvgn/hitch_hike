@@ -1,6 +1,7 @@
 from datetime import datetime, time
 from sqlalchemy import String, Float, DateTime, ForeignKey, Integer, Text, Enum as SQLEnum, Time, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import JSON
 import enum
 
 from app.core.database import Base
@@ -44,7 +45,7 @@ class Business(Base):
     address: Mapped[str] = mapped_column(String(500))
     lat: Mapped[float] = mapped_column(Float)
     lon: Mapped[float] = mapped_column(Float)
-    phone: Mapped[str] = mapped_column(String(20))
+    phones: Mapped[list[str]] = mapped_column(JSON, default=list, server_default='[]')
     email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     logo_url: Mapped[str | None] = mapped_column(String(500), nullable=True)

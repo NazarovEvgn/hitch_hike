@@ -65,17 +65,33 @@
             <div v-if="errors.address" class="error-text">{{ errors.address }}</div>
           </div>
 
-          <!-- Phone -->
+          <!-- Phones -->
           <div class="form-group">
-            <label class="form-label">Телефон</label>
-            <ion-input
-              v-model="formData.phone"
-              type="tel"
-              placeholder="+7 (xxx) xxx-xx-xx"
-              :class="{ 'ion-invalid': errors.phone, 'ion-touched': true }"
-              required
-            ></ion-input>
-            <div v-if="errors.phone" class="error-text">{{ errors.phone }}</div>
+            <div class="phones-header">
+              <label class="form-label">Телефоны</label>
+              <ion-button fill="clear" size="small" @click="addPhone">
+                <ion-icon slot="start" :icon="addOutline"></ion-icon>
+                Добавить
+              </ion-button>
+            </div>
+            <div v-for="(phone, index) in formData.phones" :key="index" class="phone-input-row">
+              <ion-input
+                v-model="formData.phones[index]"
+                type="tel"
+                :placeholder="`Телефон ${index + 1}`"
+                :class="{ 'ion-invalid': errors.phones?.[index], 'ion-touched': true }"
+                required
+              ></ion-input>
+              <ion-button
+                v-if="formData.phones.length > 1"
+                fill="clear"
+                color="danger"
+                @click="removePhone(index)"
+              >
+                <ion-icon slot="icon-only" :icon="trashOutline"></ion-icon>
+              </ion-button>
+            </div>
+            <div v-if="errors.phones" class="error-text">{{ errors.phones }}</div>
           </div>
 
           <!-- Description -->
@@ -170,7 +186,7 @@ import {
   IonLabel,
   toastController,
 } from '@ionic/vue'
-import { alertCircleOutline, homeOutline } from 'ionicons/icons'
+import { alertCircleOutline, homeOutline, addOutline, trashOutline } from 'ionicons/icons'
 import { useProfileStore } from '../stores/profileStore'
 import type { BusinessUpdateInput } from '../types'
 import AppHeader from '@/shared/components/AppHeader.vue'
@@ -184,7 +200,7 @@ const formData = reactive<BusinessUpdateInput>({
   name: '',
   business_type: 'car_wash',
   address: '',
-  phone: '',
+  phones: [''],
   description: '',
   logo_url: '',
 })
@@ -200,11 +216,21 @@ onMounted(async () => {
     formData.name = profileStore.business.name
     formData.business_type = profileStore.business.business_type
     formData.address = profileStore.business.address
-    formData.phone = profileStore.business.phone
+    formData.phones = profileStore.business.phones.length > 0 ? [...profileStore.business.phones] : ['']
     formData.description = profileStore.business.description || ''
     formData.logo_url = profileStore.business.logo_url || ''
   }
 })
+
+function addPhone() {
+  formData.phones.push('')
+}
+
+function removePhone(index: number) {
+  if (formData.phones.length > 1) {
+    formData.phones.splice(index, 1)
+  }
+}
 
 function validateForm(): boolean {
   Object.keys(errors).forEach(key => delete errors[key as keyof BusinessUpdateInput])
@@ -217,8 +243,16 @@ function validateForm(): boolean {
     errors.address = 'Адрес обязателен'
   }
 
-  if (!formData.phone.trim()) {
-    errors.phone = 'Телефон обязателен'
+  // Validate phones
+  if (formData.phones.length === 0 || formData.phones.every(p => !p.trim())) {
+    errors.phones = 'Укажите хотя бы один телефон'
+  } else {
+    // Filter out empty phones
+    formData.phones = formData.phones.filter(p => p.trim())
+    if (formData.phones.length === 0) {
+      formData.phones = ['']
+      errors.phones = 'Укажите хотя бы один телефон'
+    }
   }
 
   return Object.keys(errors).length === 0
@@ -291,6 +325,36 @@ async function handleSubmit() {
 
 .form-group {
   margin-bottom: 24px;
+}
+
+.phones-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.phones-header ion-button {
+  margin: 0;
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+
+.phone-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.phone-input-row ion-input {
+  flex: 1;
+}
+
+.phone-input-row ion-button {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  margin: 0;
 }
 
 .form-label {
