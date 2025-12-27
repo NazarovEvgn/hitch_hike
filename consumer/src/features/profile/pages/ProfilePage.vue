@@ -7,7 +7,6 @@
             <ion-icon slot="icon-only" :icon="arrowBackOutline"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-title>Настройки профиля</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -33,9 +32,6 @@
               <div v-else class="avatar-placeholder">
                 <ion-icon :icon="personOutline" size="large"></ion-icon>
               </div>
-              <div class="avatar-overlay">
-                <ion-icon :icon="cameraOutline"></ion-icon>
-              </div>
             </div>
             <input
               ref="fileInput"
@@ -53,51 +49,54 @@
 
           <!-- Phone Display -->
           <div class="profile-phone-display">
-            {{ profileStore.profile.phone || 'Телефон не указан' }}
+            {{ formatPhoneNumber(profileStore.profile.phone) }}
           </div>
-
-          <!-- Delete Avatar Button -->
-          <ion-button
-            v-if="profileStore.profile.avatar_url"
-            fill="clear"
-            size="small"
-            color="danger"
-            @click="handleDeleteAvatar"
-            class="delete-avatar-btn"
-          >
-            Удалить фото
-          </ion-button>
         </div>
 
         <!-- Edit Form Section -->
         <div class="edit-section">
-          <div class="section-title">Редактирование профиля</div>
-
           <ion-list class="edit-form">
-            <ion-item>
-              <ion-label position="floating">Ваше имя *</ion-label>
-              <ion-input v-model="formData.name" type="text" required></ion-input>
-            </ion-item>
+            <!-- Имя -->
+            <div class="form-field">
+              <div class="field-label">Ваше имя *</div>
+              <ion-item>
+                <ion-input v-model="formData.name" type="text" required></ion-input>
+              </ion-item>
+            </div>
 
-            <ion-item>
-              <ion-label position="floating">Пол</ion-label>
-              <ion-select v-model="formData.gender" placeholder="Выберите" interface="action-sheet">
-                <ion-select-option value="male">Мужской</ion-select-option>
-                <ion-select-option value="female">Женский</ion-select-option>
-                <ion-select-option value="other">Другой</ion-select-option>
-              </ion-select>
-            </ion-item>
+            <!-- Пол -->
+            <div class="form-field">
+              <div class="field-label">Пол</div>
+              <ion-item>
+                <ion-select
+                  v-model="formData.gender"
+                  placeholder="Выберите"
+                  interface="alert"
+                  :interfaceOptions="genderSelectOptions"
+                  :toggle-icon="undefined"
+                >
+                  <ion-select-option value="male">Мужской</ion-select-option>
+                  <ion-select-option value="female">Женский</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </div>
 
-            <ion-item>
-              <ion-label position="floating">Телефон</ion-label>
-              <ion-input :value="profileStore.profile.phone" type="tel" disabled></ion-input>
-              <ion-note slot="helper">Используется для входа в приложение</ion-note>
-            </ion-item>
+            <!-- Телефон -->
+            <div class="form-field">
+              <div class="field-label">Телефон</div>
+              <ion-item>
+                <ion-input :value="profileStore.profile.phone" type="tel" disabled></ion-input>
+              </ion-item>
+              <ion-note class="field-note">Используется для входа в приложение</ion-note>
+            </div>
 
-            <ion-item>
-              <ion-label position="floating">Почта</ion-label>
-              <ion-input v-model="formData.email" type="email"></ion-input>
-            </ion-item>
+            <!-- Почта -->
+            <div class="form-field">
+              <div class="field-label">Почта</div>
+              <ion-item>
+                <ion-input v-model="formData.email" type="email"></ion-input>
+              </ion-item>
+            </div>
           </ion-list>
 
           <!-- Error Message -->
@@ -168,6 +167,17 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const avatarPreview = ref<string | null>(null)
 const selectedFile = ref<File | null>(null)
 
+const genderSelectOptions = {
+  buttons: [
+    {
+      text: 'Сохранить',
+      handler: () => {
+        return true
+      }
+    }
+  ]
+}
+
 const isFormValid = computed(() => {
   return formData.value.name.trim().length > 0
 })
@@ -186,6 +196,21 @@ function getFullAvatarUrl(avatarUrl: string | null): string {
   // Remove /api/v1 from base URL and append avatar URL
   const baseUrl = API_BASE_URL.replace('/api/v1', '')
   return `${baseUrl}${avatarUrl}`
+}
+
+function formatPhoneNumber(phone: string | null): string {
+  if (!phone) return 'Телефон не указан'
+
+  // Remove all non-digit characters
+  const digits = phone.replace(/\D/g, '')
+
+  // Format as +7 (xxx) xxx-xx-xx
+  if (digits.length >= 11) {
+    return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9, 11)}`
+  }
+
+  // If format is unexpected, return as is
+  return phone
 }
 
 function triggerFileInput() {
@@ -302,13 +327,13 @@ async function showToast(message: string, color: string) {
 
 /* Profile Card - верхняя карточка */
 .profile-card {
-  background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
   padding: 40px 24px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .avatar-section {
@@ -375,7 +400,7 @@ async function showToast(message: string, color: string) {
 }
 
 .profile-name-display {
-  color: white;
+  color: var(--ion-color-dark);
   font-size: 24px;
   font-weight: 700;
   text-align: center;
@@ -383,7 +408,7 @@ async function showToast(message: string, color: string) {
 }
 
 .profile-phone-display {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--ion-color-medium);
   font-size: 16px;
   text-align: center;
   margin-bottom: 8px;
@@ -414,19 +439,47 @@ async function showToast(message: string, color: string) {
   padding: 0;
 }
 
+.form-field {
+  margin-bottom: 20px;
+}
+
+.field-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.field-note {
+  display: block;
+  font-size: 12px;
+  color: var(--ion-color-medium);
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
 .edit-form ion-item {
   --background: white;
   --border-radius: 12px;
   --padding-start: 16px;
   --padding-end: 16px;
   --inner-padding-end: 0;
-  margin-bottom: 12px;
+  margin-bottom: 0;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .edit-form ion-item::part(native) {
   border-radius: 12px;
+}
+
+.edit-form ion-select {
+  --padding-start: 0;
+}
+
+.edit-form ion-select::part(icon) {
+  display: none;
 }
 
 .error-message {
