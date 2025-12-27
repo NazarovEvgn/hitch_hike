@@ -13,12 +13,13 @@
 
             <!-- DEV MODE: Упрощенный вход по телефону без кода -->
             <form @submit.prevent="handleDevLogin">
+              <div class="phone-label">Ваш номер телефона:</div>
               <ion-item lines="full" class="ion-margin-bottom">
-                <ion-label position="floating">Номер телефона</ion-label>
                 <ion-input
-                  v-model="clientPhone"
+                  v-model="displayPhone"
+                  @ionInput="handlePhoneInput"
                   type="tel"
-                  placeholder="+7 (999) 123-45-67"
+                  placeholder="+7 (xxx) xxx-xx-xx"
                   required
                   autocomplete="tel"
                 />
@@ -146,9 +147,70 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 // Client (passwordless) login state
-const clientPhone = ref('')
+const clientPhone = ref('') // Raw phone number for API
+const displayPhone = ref('') // Formatted phone number for display
 const clientLoading = ref(false)
 const clientError = ref('')
+
+// Format phone number as user types
+function formatPhoneNumber(value: string): string {
+  // Remove all non-digit characters
+  const digits = value.replace(/\D/g, '')
+
+  // If starts with 8, replace with 7
+  let normalized = digits
+  if (normalized.startsWith('8')) {
+    normalized = '7' + normalized.slice(1)
+  }
+
+  // If doesn't start with 7, add it
+  if (normalized && !normalized.startsWith('7')) {
+    normalized = '7' + normalized
+  }
+
+  // Apply formatting: +7 (xxx) xxx-xx-xx
+  if (normalized.length === 0) {
+    return ''
+  }
+
+  let formatted = '+7'
+
+  if (normalized.length > 1) {
+    formatted += ' (' + normalized.slice(1, 4)
+  }
+
+  if (normalized.length > 4) {
+    formatted += ') ' + normalized.slice(4, 7)
+  }
+
+  if (normalized.length > 7) {
+    formatted += '-' + normalized.slice(7, 9)
+  }
+
+  if (normalized.length > 9) {
+    formatted += '-' + normalized.slice(9, 11)
+  }
+
+  return formatted
+}
+
+function handlePhoneInput(event: any) {
+  const input = event.target.value || ''
+  const formatted = formatPhoneNumber(input)
+  displayPhone.value = formatted
+
+  // Store raw digits for API (with +7 prefix)
+  const digits = input.replace(/\D/g, '')
+  let normalized = digits
+  if (normalized.startsWith('8')) {
+    normalized = '7' + normalized.slice(1)
+  }
+  if (normalized && !normalized.startsWith('7')) {
+    normalized = '7' + normalized
+  }
+
+  clientPhone.value = normalized ? '+' + normalized : ''
+}
 
 // Business login state
 const businessEmail = ref('')
@@ -336,6 +398,15 @@ ion-input {
 
 .dev-mode-note p {
   margin: 0;
+}
+
+.phone-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--ion-color-dark);
+  margin-bottom: 0.5rem;
+  padding-left: 4px;
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
 /* Бизнес логин */

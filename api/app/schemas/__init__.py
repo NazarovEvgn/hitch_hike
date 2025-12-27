@@ -1,5 +1,5 @@
 from app.schemas.auth import Token, TokenData, UserLogin, UserRegister
-from app.schemas.user import User, UserCreate, UserUpdate
+from app.schemas.user import User, UserCreate, UserProfileUpdate
 from app.schemas.business import Business, BusinessCreate, BusinessUpdate
 from app.schemas.service import Service, ServiceCreate, ServiceUpdate
 from app.schemas.booking import Booking, BookingCreate, BookingUpdate
@@ -12,7 +12,7 @@ __all__ = [
     "UserRegister",
     "User",
     "UserCreate",
-    "UserUpdate",
+    "UserProfileUpdate",
     "Business",
     "BusinessCreate",
     "BusinessUpdate",
