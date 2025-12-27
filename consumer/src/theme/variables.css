@@ -1,20 +1,31 @@
-/* Ionic Variables and Theming */
-/* http://ionicframework.com/docs/theming/ */
+/*
+  Ionic Theme Variables
+  https://ionicframework.com/docs/theming/themes
+*/
+
+/* Импорт шрифтов Tilda Sans */
+@import './fonts.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Default Ionic colors (no custom branding for now) */
-
-  /* Ionic Primary */
-  --ion-color-primary: #3880ff;
-  --ion-color-primary-rgb: 56, 128, 255;
+  /* Ionic Primary (фиолетовый) */
+  --ion-color-primary: #8A2BE2;
+  --ion-color-primary-rgb: 138, 43, 226;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #3171e0;
-  --ion-color-primary-tint: #4c8dff;
+  --ion-color-primary-shade: #7A25C7;
+  --ion-color-primary-tint: #9A3FE8;
+
+  /* Ionic Success (дефолтный зеленый) */
+  --ion-color-success: #2dd36f;
+  --ion-color-success-rgb: 45, 211, 111;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #28ba62;
+  --ion-color-success-tint: #42d77d;
 
   /* Ionic Secondary */
   --ion-color-secondary: #3dc2ff;
@@ -79,17 +90,25 @@
   --ion-color-light-contrast-rgb: 0, 0, 0;
   --ion-color-light-shade: #d7d8da;
   --ion-color-light-tint: #f5f6f9;
+
+  /* Шрифт по умолчанию - Tilda Sans */
+  --ion-font-family: 'Tilda Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
 }
 
-/* Force light mode (disable automatic dark mode) */
+/* Применение шрифта глобально */
+* {
+  font-family: var(--ion-font-family);
+}
+
+/* Отключаем автоматическую темную тему - фиксируем светлую тему */
 body {
   color-scheme: light;
 }
 
-/* Override background and text colors for light mode */
+/* Переопределяем цвета текста и фона для светлой темы */
 body {
-  --ion-background-color: #ffffff;
-  --ion-background-color-rgb: 255, 255, 255;
+  --ion-background-color: #F5F5F5;
+  --ion-background-color-rgb: 245, 245, 245;
 
   --ion-text-color: #000000;
   --ion-text-color-rgb: 0, 0, 0;
@@ -113,4 +132,10 @@ body {
   --ion-color-step-850: #262626;
   --ion-color-step-900: #191919;
   --ion-color-step-950: #0d0d0d;
+}
+
+/* Современное закругление углов для карточек */
+ion-card {
+  border-radius: 12px;
+  overflow: hidden;
 }

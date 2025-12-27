@@ -53,9 +53,10 @@ app.add_middleware(
 )
 
 # Include routers
-from app.api.v1 import admin, businesses, bookings, favorites, upload
+from app.api.v1 import admin, businesses, bookings, favorites, upload, profile
 
 app.include_router(auth.router, prefix="/api/v1")
+app.include_router(profile.router, prefix="/api/v1")
 app.include_router(admin.router, prefix="/api/v1")
 app.include_router(businesses.router, prefix="/api/v1")
 app.include_router(bookings.router, prefix="/api/v1")

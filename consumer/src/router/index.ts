@@ -20,6 +20,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/favorites',
     name: 'Favorites',
     component: () => import('@/features/businesses/pages/FavoritesPage.vue')
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('@/features/profile/pages/ProfilePage.vue')
   }
 ]
 

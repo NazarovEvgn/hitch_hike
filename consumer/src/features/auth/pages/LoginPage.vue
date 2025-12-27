@@ -5,13 +5,11 @@
         <!-- Лого и заголовок -->
         <div class="login-header">
           <h1 class="ion-text-center">Lets</h1>
-          <p class="subtitle">Онлайн-запись в сервисы</p>
         </div>
 
         <!-- Основная форма: Passwordless вход для клиентов -->
         <ion-card class="login-card">
           <ion-card-content>
-            <h2 class="card-title">Вход по номеру телефона</h2>
 
             <!-- Шаг 1: Ввод номера телефона -->
             <form v-if="!otpSent" @submit.prevent="handleSendOTP">
@@ -267,6 +265,7 @@ async function handleBusinessLogin() {
 <style scoped>
 ion-content {
   --background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
 .login-container {
@@ -292,12 +291,6 @@ h1 {
   font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
-.subtitle {
-  color: var(--ion-color-medium);
-  font-size: 1rem;
-  margin: 0.5rem 0 0 0;
-}
-
 .login-card {
   width: 100%;
   max-width: 420px;
@@ -313,14 +306,6 @@ ion-card-content {
   padding: 32px 24px;
 }
 
-.card-title {
-  text-align: center;
-  color: var(--ion-color-dark);
-  font-weight: 600;
-  font-size: 1.1rem;
-  margin: 0 0 1.5rem 0;
-}
-
 ion-item {
   --background: #ffffff;
   --border-radius: 12px;
@@ -329,6 +314,7 @@ ion-item {
   --border-width: 1px;
   --border-color: var(--ion-color-light-shade);
   margin-bottom: 16px;
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
 ion-item:focus-within {
@@ -339,12 +325,14 @@ ion-item:focus-within {
 ion-label {
   font-weight: 500;
   --color: var(--ion-color-dark);
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
 ion-input {
   --color: var(--ion-color-dark);
   --placeholder-color: var(--ion-color-medium);
   font-size: 1rem;
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
 .error-message {
@@ -354,6 +342,7 @@ ion-input {
   border-radius: 8px;
   background-color: var(--ion-color-danger-tint);
   border-left: 3px solid var(--ion-color-danger);
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
 .error-message p {
@@ -366,6 +355,7 @@ ion-input {
   display: block;
   margin-bottom: 1rem;
   text-align: center;
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
 .otp-sent-message p {
@@ -381,6 +371,7 @@ ion-input {
   background-color: var(--ion-color-success-tint);
   border-left: 3px solid var(--ion-color-success);
   text-align: center;
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
 .debug-code p {
@@ -397,6 +388,7 @@ ion-input {
   font-size: 1rem;
   text-transform: none;
   letter-spacing: 0.02em;
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
 .login-button:hover {
@@ -411,14 +403,21 @@ ion-input {
 }
 
 .business-login-container ion-accordion-group {
-  border: 2px solid var(--ion-color-light-shade);
+  border: 2px solid var(--ion-color-medium-tint);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.business-login-container ion-accordion-group:hover {
+  border-color: var(--ion-color-primary);
+  box-shadow: 0 4px 12px rgba(39, 18, 106, 0.15);
 }
 
 .business-header {
+  --border-radius: 0;
   cursor: pointer;
 }
 
@@ -427,6 +426,7 @@ ion-input {
   font-weight: 600;
   font-size: 0.95rem;
   color: var(--ion-color-dark);
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
 .business-content {
@@ -436,6 +436,7 @@ ion-input {
 .register-link-container {
   margin-top: 1rem;
   text-align: center;
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
 .register-link-container p {
@@ -447,6 +448,7 @@ ion-input {
   color: var(--ion-color-primary);
   text-decoration: none;
   font-weight: 600;
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 
 .register-link:hover {
@@ -455,5 +457,6 @@ ion-input {
 
 ion-button[fill="clear"] {
   --color: var(--ion-color-primary);
+  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
 }
 </style>
