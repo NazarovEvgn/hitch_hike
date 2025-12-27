@@ -4,7 +4,7 @@
       <div class="login-container">
         <!-- Лого и заголовок -->
         <div class="login-header">
-          <h1 class="ion-text-center">Lets</h1>
+          <img src="@/assets/logo-app.svg" alt="Lets" class="logo" />
         </div>
 
         <!-- Основная форма: Passwordless вход для клиентов -->
@@ -273,15 +273,16 @@ ion-content {
 .login-header {
   margin-bottom: 2rem;
   text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-h1 {
-  color: #000000;
-  font-weight: 700;
-  font-size: 3rem;
-  margin: 0;
-  letter-spacing: -0.02em;
-  font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
+.logo {
+  width: auto;
+  height: 80px;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .login-card {
@@ -432,15 +433,38 @@ ion-input {
 
 .business-header {
   --border-radius: 0;
+  --min-height: 56px;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --inner-padding-top: 0;
+  --inner-padding-bottom: 0;
   cursor: pointer;
+  height: 56px;
+}
+
+.business-header::part(native) {
+  display: flex;
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.business-header ion-label {
+  display: flex;
+  align-items: center;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 100%;
 }
 
 .business-header ion-label h3 {
-  margin: 0;
+  margin: 0 !important;
+  padding: 0 !important;
   font-weight: 600;
   font-size: 0.95rem;
   color: var(--ion-color-dark);
   font-family: 'Tilda Sans', -apple-system, system-ui, sans-serif;
+  line-height: 1.2;
 }
 
 .business-content {

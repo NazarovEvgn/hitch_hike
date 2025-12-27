@@ -20,10 +20,12 @@
 
         <!-- Notifications Button -->
         <ion-buttons slot="end">
-          <ion-button id="notifications-trigger">
-            <ion-icon slot="icon-only" :icon="notificationsOutline"></ion-icon>
-            <ion-badge v-if="unreadNotifications > 0" color="danger">{{ unreadNotifications }}</ion-badge>
-          </ion-button>
+          <div class="notifications-button-wrapper">
+            <ion-button id="notifications-trigger">
+              <ion-icon slot="icon-only" :icon="notificationsOutline" class="notifications-icon"></ion-icon>
+            </ion-button>
+            <ion-badge v-if="unreadNotifications > 0" color="danger" class="notifications-badge">{{ unreadNotifications }}</ion-badge>
+          </div>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -464,6 +466,37 @@ function markAllAsRead() {
   color: rgba(255, 255, 255, 0.8);
   font-size: 12px;
   line-height: 1.2;
+}
+
+/* Notifications Button - iOS Style */
+.notifications-button-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.notifications-icon {
+  font-size: 28px !important;
+  color: white;
+}
+
+.notifications-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FF3B30;
+  color: white;
+  border: 2px solid var(--ion-color-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
 }
 
 .search-panel {
