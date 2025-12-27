@@ -18,11 +18,11 @@
           </div>
         </div>
 
-        <!-- Favorites Button -->
+        <!-- Notifications Button -->
         <ion-buttons slot="end">
-          <ion-button @click="router.push('/favorites')">
-            <ion-icon slot="icon-only" :icon="heartOutline"></ion-icon>
-            <ion-badge v-if="favoritesCount > 0" color="danger">{{ favoritesCount }}</ion-badge>
+          <ion-button id="notifications-trigger">
+            <ion-icon slot="icon-only" :icon="notificationsOutline"></ion-icon>
+            <ion-badge v-if="unreadNotifications > 0" color="danger">{{ unreadNotifications }}</ion-badge>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -89,6 +89,53 @@
         </ion-item>
       </ion-list>
     </ion-content>
+
+    <!-- Notifications Popover -->
+    <ion-popover trigger="notifications-trigger" :dismiss-on-select="true">
+      <ion-content class="notifications-popover">
+        <div class="notifications-header">
+          <h3>Уведомления</h3>
+          <ion-button
+            v-if="notifications.length > 0"
+            fill="clear"
+            size="small"
+            @click="markAllAsRead"
+          >
+            Отметить все
+          </ion-button>
+        </div>
+
+        <!-- Notifications List -->
+        <ion-list v-if="notifications.length > 0" class="notifications-list">
+          <ion-item
+            v-for="notification in notifications"
+            :key="notification.id"
+            :class="{ 'unread': !notification.read }"
+            button
+            @click="handleNotificationClick(notification)"
+          >
+            <div class="notification-content">
+              <div class="notification-icon" :class="`type-${notification.type}`">
+                <ion-icon
+                  :icon="getNotificationIcon(notification.type)"
+                ></ion-icon>
+              </div>
+              <div class="notification-text">
+                <div class="notification-title">{{ notification.title }}</div>
+                <div class="notification-message">{{ notification.message }}</div>
+                <div class="notification-time">{{ formatTime(notification.time) }}</div>
+              </div>
+            </div>
+          </ion-item>
+        </ion-list>
+
+        <!-- Empty State -->
+        <div v-else class="notifications-empty">
+          <ion-icon :icon="notificationsOffOutline" size="large"></ion-icon>
+          <p>Нет уведомлений</p>
+        </div>
+      </ion-content>
+    </ion-popover>
 
     <!-- Business Details Modal -->
     <ion-modal :is-open="!!selectedBusiness" @did-dismiss="selectedBusiness = null">
@@ -171,9 +218,11 @@ import {
   IonModal,
   IonCard,
   IonCardContent,
+  IonPopover,
 } from '@ionic/vue'
 import {
-  heartOutline,
+  notificationsOutline,
+  notificationsOffOutline,
   businessOutline,
   locationOutline,
   callOutline,
@@ -181,6 +230,9 @@ import {
   closeOutline,
   calendarOutline,
   personCircleOutline,
+  checkmarkCircleOutline,
+  alertCircleOutline,
+  informationCircleOutline,
 } from 'ionicons/icons'
 import { useBusinessesStore } from '../stores/businessesStore'
 import { useProfileStore } from '@/features/profile/stores/profileStore'
@@ -193,7 +245,47 @@ const profileStore = useProfileStore()
 
 const searchQuery = ref('')
 const selectedBusiness = ref<Business | null>(null)
-const favoritesCount = ref(0)
+
+// Notifications state
+interface Notification {
+  id: number
+  type: 'success' | 'info' | 'warning'
+  title: string
+  message: string
+  time: Date
+  read: boolean
+}
+
+const notifications = ref<Notification[]>([
+  {
+    id: 1,
+    type: 'success',
+    title: 'Запись подтверждена',
+    message: 'Ваша запись на 15:00 успешно подтверждена',
+    time: new Date(Date.now() - 1000 * 60 * 30), // 30 min ago
+    read: false,
+  },
+  {
+    id: 2,
+    type: 'info',
+    title: 'Напоминание',
+    message: 'Через 1 час ваша запись в "Автомойка №1"',
+    time: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+    read: false,
+  },
+  {
+    id: 3,
+    type: 'warning',
+    title: 'Изменение времени',
+    message: 'Время вашей записи изменено на 16:00',
+    time: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+    read: true,
+  },
+])
+
+const unreadNotifications = computed(() => {
+  return notifications.value.filter(n => !n.read).length
+})
 
 const filteredBusinesses = computed(() => {
   let businesses = businessesStore.businesses
@@ -222,10 +314,6 @@ onMounted(async () => {
     longitude: 65.5343,
     radius_km: 10,
   })
-
-  // Load favorites count from localStorage
-  const favorites = JSON.parse(localStorage.getItem('favorites') || '[]')
-  favoritesCount.value = favorites.length
 })
 
 function getFullAvatarUrl(avatarUrl: string | null): string {
@@ -275,6 +363,50 @@ function bookService(business: Business) {
   // TODO: Open booking dialog
   console.log('Book service for:', business.name)
   selectedBusiness.value = null
+}
+
+function getNotificationIcon(type: string) {
+  switch (type) {
+    case 'success':
+      return checkmarkCircleOutline
+    case 'warning':
+      return alertCircleOutline
+    case 'info':
+    default:
+      return informationCircleOutline
+  }
+}
+
+function formatTime(date: Date): string {
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 60) {
+    return `${diffMins} мин назад`
+  } else if (diffHours < 24) {
+    return `${diffHours} ч назад`
+  } else if (diffDays === 1) {
+    return 'Вчера'
+  } else if (diffDays < 7) {
+    return `${diffDays} дн назад`
+  } else {
+    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
+  }
+}
+
+function handleNotificationClick(notification: Notification) {
+  // Mark as read
+  notification.read = true
+
+  // TODO: Handle notification action (navigate to booking details, etc.)
+  console.log('Notification clicked:', notification)
+}
+
+function markAllAsRead() {
+  notifications.value.forEach(n => n.read = true)
 }
 </script>
 
@@ -440,5 +572,125 @@ function bookService(business: Business) {
   flex-direction: column;
   gap: 12px;
   margin-top: 24px;
+}
+
+/* Notifications Popover */
+.notifications-popover {
+  --width: 360px;
+  --max-height: 500px;
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--ion-color-light);
+}
+
+.notifications-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.notifications-list {
+  padding: 0;
+}
+
+.notifications-list ion-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  --min-height: 80px;
+  border-bottom: 1px solid var(--ion-color-light);
+}
+
+.notifications-list ion-item.unread {
+  --background: rgba(138, 43, 226, 0.05);
+}
+
+.notification-content {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.notification-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-icon ion-icon {
+  font-size: 24px;
+}
+
+.notification-icon.type-success {
+  background: rgba(45, 211, 111, 0.15);
+  color: var(--ion-color-success);
+}
+
+.notification-icon.type-info {
+  background: rgba(61, 194, 255, 0.15);
+  color: var(--ion-color-secondary);
+}
+
+.notification-icon.type-warning {
+  background: rgba(255, 196, 9, 0.15);
+  color: var(--ion-color-warning);
+}
+
+.notification-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  line-height: 1.3;
+}
+
+.notification-message {
+  font-size: 14px;
+  color: var(--ion-color-medium);
+  line-height: 1.4;
+}
+
+.notification-time {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+  margin-top: 2px;
+}
+
+.notifications-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  gap: 16px;
+}
+
+.notifications-empty ion-icon {
+  font-size: 64px;
+  color: var(--ion-color-medium);
+  opacity: 0.5;
+}
+
+.notifications-empty p {
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 16px;
 }
 </style>

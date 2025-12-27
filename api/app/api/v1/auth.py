@@ -247,3 +247,37 @@ async def verify_otp(credentials: OTPVerify, db: AsyncSession = Depends(get_db))
     refresh_token = create_refresh_token(subject=user.id)
 
     return Token(access_token=access_token, refresh_token=refresh_token)
+
+
+@router.post("/dev-login", response_model=Token)
+async def dev_login(request: PhoneOTPRequest, db: AsyncSession = Depends(get_db)):
+    """
+    DEV MODE ONLY: Login with phone number without OTP verification.
+    This endpoint is for development purposes only and should be disabled in production.
+    """
+    phone = request.phone.strip()
+
+    # Find or create user
+    result = await db.execute(select(User).where(User.phone == phone))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        # Auto-register user with phone
+        user = User(
+            phone=phone,
+            name=f"User {phone[-4:]}",  # Default name from last 4 digits
+            email=None,  # Phone-only login
+            password_hash=None,  # No password for passwordless
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+        logger.info(f"✅ [DEV MODE] Auto-registered new user with phone: {phone}")
+    else:
+        logger.info(f"✅ [DEV MODE] User logged in with phone: {phone}")
+
+    # Create tokens
+    access_token = create_access_token(subject=user.id, user_type="client")
+    refresh_token = create_refresh_token(subject=user.id)
+
+    return Token(access_token=access_token, refresh_token=refresh_token)

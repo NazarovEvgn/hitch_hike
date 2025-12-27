@@ -12,6 +12,29 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = ref(!!accessToken.value)
 
+  async function devLogin(data: PhoneOTPRequest): Promise<{ success: boolean; error?: string }> {
+    try {
+      const tokens = await authApiService.devLogin(data)
+
+      accessToken.value = tokens.access_token
+      refreshToken.value = tokens.refresh_token
+      userType.value = 'client'
+      isAuthenticated.value = true
+
+      localStorage.setItem('access_token', tokens.access_token)
+      localStorage.setItem('refresh_token', tokens.refresh_token)
+      localStorage.setItem('user_type', 'client')
+
+      return { success: true }
+    } catch (err: any) {
+      console.error('[AuthStore] devLogin error:', err)
+      return {
+        success: false,
+        error: err.response?.data?.detail || 'Login failed'
+      }
+    }
+  }
+
   async function sendOTP(data: PhoneOTPRequest): Promise<{ success: boolean; error?: string; debugCode?: string }> {
     try {
       const result = await authApiService.sendOTP(data)
@@ -90,6 +113,7 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken,
     userType,
     isAuthenticated,
+    devLogin,
     sendOTP,
     verifyOTP,
     loginBusiness,

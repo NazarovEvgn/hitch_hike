@@ -11,91 +11,113 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content :fullscreen="true" class="ion-padding">
+    <ion-content :fullscreen="true">
       <!-- Loading -->
       <div v-if="profileStore.loading && !profileStore.profile" class="loading-container">
         <ion-spinner name="crescent"></ion-spinner>
       </div>
 
-      <!-- Profile Form -->
-      <div v-else-if="profileStore.profile">
-        <!-- Avatar Section -->
-        <div class="avatar-section">
-          <div class="avatar-wrapper" @click="triggerFileInput">
-            <img
-              v-if="avatarPreview || profileStore.profile.avatar_url"
-              :src="avatarPreview || getFullAvatarUrl(profileStore.profile.avatar_url)"
-              alt="Avatar"
-              class="avatar-image"
+      <!-- Profile Content -->
+      <div v-else-if="profileStore.profile" class="profile-content">
+        <!-- Profile Card - Avatar, Name, Phone -->
+        <div class="profile-card">
+          <!-- Avatar -->
+          <div class="avatar-section">
+            <div class="avatar-wrapper" @click="triggerFileInput">
+              <img
+                v-if="avatarPreview || profileStore.profile.avatar_url"
+                :src="avatarPreview || getFullAvatarUrl(profileStore.profile.avatar_url)"
+                alt="Avatar"
+                class="avatar-image"
+              />
+              <div v-else class="avatar-placeholder">
+                <ion-icon :icon="personOutline" size="large"></ion-icon>
+              </div>
+              <div class="avatar-overlay">
+                <ion-icon :icon="cameraOutline"></ion-icon>
+              </div>
+            </div>
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              style="display: none"
+              @change="handleFileSelect"
             />
-            <div v-else class="avatar-placeholder">
-              <ion-icon :icon="personOutline" size="large"></ion-icon>
-            </div>
-            <div class="avatar-overlay">
-              <ion-icon :icon="cameraOutline"></ion-icon>
-            </div>
           </div>
-          <input
-            ref="fileInput"
-            type="file"
-            accept="image/*"
-            style="display: none"
-            @change="handleFileSelect"
-          />
+
+          <!-- Name Display -->
+          <div class="profile-name-display">
+            {{ profileStore.profile.name }}
+          </div>
+
+          <!-- Phone Display -->
+          <div class="profile-phone-display">
+            {{ profileStore.profile.phone || 'Телефон не указан' }}
+          </div>
+
+          <!-- Delete Avatar Button -->
           <ion-button
             v-if="profileStore.profile.avatar_url"
             fill="clear"
             size="small"
             color="danger"
             @click="handleDeleteAvatar"
+            class="delete-avatar-btn"
           >
             Удалить фото
           </ion-button>
         </div>
 
-        <!-- Form -->
-        <ion-list>
-          <ion-item>
-            <ion-label position="floating">Имя *</ion-label>
-            <ion-input v-model="formData.name" type="text" required></ion-input>
-          </ion-item>
+        <!-- Edit Form Section -->
+        <div class="edit-section">
+          <div class="section-title">Редактирование профиля</div>
 
-          <ion-item>
-            <ion-label position="floating">Пол</ion-label>
-            <ion-select v-model="formData.gender" placeholder="Выберите">
-              <ion-select-option value="male">Мужской</ion-select-option>
-              <ion-select-option value="female">Женский</ion-select-option>
-              <ion-select-option value="other">Другой</ion-select-option>
-            </ion-select>
-          </ion-item>
+          <ion-list class="edit-form">
+            <ion-item>
+              <ion-label position="floating">Ваше имя *</ion-label>
+              <ion-input v-model="formData.name" type="text" required></ion-input>
+            </ion-item>
 
-          <ion-item>
-            <ion-label position="floating">Телефон</ion-label>
-            <ion-input :value="profileStore.profile.phone" type="tel" disabled></ion-input>
-            <ion-note slot="helper">Номер телефона используется для входа</ion-note>
-          </ion-item>
+            <ion-item>
+              <ion-label position="floating">Пол</ion-label>
+              <ion-select v-model="formData.gender" placeholder="Выберите" interface="action-sheet">
+                <ion-select-option value="male">Мужской</ion-select-option>
+                <ion-select-option value="female">Женский</ion-select-option>
+                <ion-select-option value="other">Другой</ion-select-option>
+              </ion-select>
+            </ion-item>
 
-          <ion-item>
-            <ion-label position="floating">Email</ion-label>
-            <ion-input v-model="formData.email" type="email"></ion-input>
-          </ion-item>
-        </ion-list>
+            <ion-item>
+              <ion-label position="floating">Телефон</ion-label>
+              <ion-input :value="profileStore.profile.phone" type="tel" disabled></ion-input>
+              <ion-note slot="helper">Используется для входа в приложение</ion-note>
+            </ion-item>
 
-        <!-- Error Message -->
-        <ion-text v-if="profileStore.error" color="danger" class="error-message">
-          <p>{{ profileStore.error }}</p>
-        </ion-text>
+            <ion-item>
+              <ion-label position="floating">Почта</ion-label>
+              <ion-input v-model="formData.email" type="email"></ion-input>
+            </ion-item>
+          </ion-list>
 
-        <!-- Save Button -->
-        <ion-button
-          expand="block"
-          :disabled="profileStore.loading || !isFormValid"
-          @click="handleSave"
-          class="save-button"
-        >
-          <ion-spinner v-if="profileStore.loading" name="crescent" />
-          <span v-else>Сохранить изменения</span>
-        </ion-button>
+          <!-- Error Message -->
+          <ion-text v-if="profileStore.error" color="danger" class="error-message">
+            <p>{{ profileStore.error }}</p>
+          </ion-text>
+
+          <!-- Save Button -->
+          <div class="button-section">
+            <ion-button
+              expand="block"
+              :disabled="profileStore.loading || !isFormValid"
+              @click="handleSave"
+              size="large"
+            >
+              <ion-spinner v-if="profileStore.loading" name="crescent" />
+              <span v-else>Сохранить изменения</span>
+            </ion-button>
+          </div>
+        </div>
       </div>
     </ion-content>
   </ion-page>
@@ -272,19 +294,39 @@ async function showToast(message: string, color: string) {
   height: 100%;
 }
 
-.avatar-section {
+.profile-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* Profile Card - верхняя карточка */
+.profile-card {
+  background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+  padding: 40px 24px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  padding: 24px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .avatar-wrapper {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.avatar-wrapper:active {
+  transform: scale(0.95);
 }
 
 .avatar-image {
@@ -292,57 +334,124 @@ async function showToast(message: string, color: string) {
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid var(--ion-color-primary);
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  background: white;
 }
 
 .avatar-placeholder {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: var(--ion-color-light);
+  background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 4px solid var(--ion-color-primary);
+  border: 5px solid rgba(255, 255, 255, 0.3);
 }
 
 .avatar-placeholder ion-icon {
-  font-size: 48px;
-  color: var(--ion-color-medium);
+  font-size: 64px;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .avatar-overlay {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 36px;
-  height: 36px;
+  bottom: 5px;
+  right: 5px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: var(--ion-color-primary);
+  background: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid var(--ion-background-color);
+  border: 3px solid var(--ion-color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .avatar-overlay ion-icon {
+  color: var(--ion-color-primary);
+  font-size: 24px;
+}
+
+.profile-name-display {
   color: white;
-  font-size: 20px;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.profile-phone-display {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.delete-avatar-btn {
+  margin-top: 4px;
+  --color: rgba(255, 255, 255, 0.9);
+}
+
+/* Edit Form Section */
+.edit-section {
+  flex: 1;
+  background: var(--ion-background-color);
+  padding: 24px 16px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.edit-form {
+  background: transparent;
+  padding: 0;
+}
+
+.edit-form ion-item {
+  --background: white;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.edit-form ion-item::part(native) {
+  border-radius: 12px;
 }
 
 .error-message {
   display: block;
   margin: 16px 0;
-  padding: 12px;
+  padding: 12px 16px;
   background: rgba(235, 68, 90, 0.1);
-  border-radius: 8px;
+  border-radius: 12px;
+  border-left: 4px solid var(--ion-color-danger);
 }
 
 .error-message p {
   margin: 0;
+  font-size: 14px;
 }
 
-.save-button {
+.button-section {
   margin-top: 24px;
+  padding: 0 4px;
+}
+
+.button-section ion-button {
+  --border-radius: 12px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.3px;
 }
 </style>

@@ -11,8 +11,8 @@
         <ion-card class="login-card">
           <ion-card-content>
 
-            <!-- Шаг 1: Ввод номера телефона -->
-            <form v-if="!otpSent" @submit.prevent="handleSendOTP">
+            <!-- DEV MODE: Упрощенный вход по телефону без кода -->
+            <form @submit.prevent="handleDevLogin">
               <ion-item lines="full" class="ion-margin-bottom">
                 <ion-label position="floating">Номер телефона</ion-label>
                 <ion-input
@@ -35,52 +35,12 @@
                 class="login-button"
               >
                 <ion-spinner v-if="clientLoading" name="crescent" />
-                <span v-else>Получить код</span>
-              </ion-button>
-            </form>
-
-            <!-- Шаг 2: Ввод кода подтверждения -->
-            <form v-else @submit.prevent="handleVerifyOTP">
-              <ion-text color="medium" class="otp-sent-message">
-                <p>
-                  Код отправлен на номер <strong>{{ clientPhone }}</strong>
-                  <ion-button fill="clear" size="small" @click="resetOTPForm">
-                    Изменить
-                  </ion-button>
-                </p>
-              </ion-text>
-
-              <!-- MVP: Показываем код в UI для тестирования -->
-              <ion-text v-if="debugCode" color="success" class="debug-code">
-                <p><strong>Код для теста:</strong> {{ debugCode }}</p>
-              </ion-text>
-
-              <ion-item lines="full" class="ion-margin-bottom">
-                <ion-label position="floating">Код подтверждения</ion-label>
-                <ion-input
-                  v-model="otpCode"
-                  type="text"
-                  inputmode="numeric"
-                  maxlength="6"
-                  placeholder="000000"
-                  required
-                  autofocus
-                />
-              </ion-item>
-
-              <ion-text v-if="clientError" color="danger" class="error-message">
-                <p>{{ clientError }}</p>
-              </ion-text>
-
-              <ion-button
-                expand="block"
-                type="submit"
-                :disabled="clientLoading"
-                class="login-button"
-              >
-                <ion-spinner v-if="clientLoading" name="crescent" />
                 <span v-else>Войти</span>
               </ion-button>
+
+              <ion-text color="medium" class="dev-mode-note">
+                <p>Режим разработки: вход без кода подтверждения</p>
+              </ion-text>
             </form>
           </ion-card-content>
         </ion-card>
@@ -187,9 +147,6 @@ const authStore = useAuthStore()
 
 // Client (passwordless) login state
 const clientPhone = ref('')
-const otpCode = ref('')
-const otpSent = ref(false)
-const debugCode = ref('')
 const clientLoading = ref(false)
 const clientError = ref('')
 
@@ -200,46 +157,20 @@ const showPassword = ref(false)
 const businessLoading = ref(false)
 const businessError = ref('')
 
-async function handleSendOTP() {
+async function handleDevLogin() {
   clientError.value = ''
   clientLoading.value = true
 
-  const result = await authStore.sendOTP({ phone: clientPhone.value })
-
-  clientLoading.value = false
-
-  if (result.success) {
-    otpSent.value = true
-    debugCode.value = result.debugCode || '' // MVP only
-  } else {
-    clientError.value = result.error || 'Ошибка отправки кода'
-  }
-}
-
-async function handleVerifyOTP() {
-  clientError.value = ''
-  clientLoading.value = true
-
-  const result = await authStore.verifyOTP({
-    phone: clientPhone.value,
-    code: otpCode.value,
-  })
+  const result = await authStore.devLogin({ phone: clientPhone.value })
 
   clientLoading.value = false
 
   if (result.success) {
     // Редирект на главную страницу клиента
-    await router.push('/') // или '/map' для карты
+    await router.push('/map')
   } else {
-    clientError.value = result.error || 'Неверный код'
+    clientError.value = result.error || 'Ошибка входа'
   }
-}
-
-function resetOTPForm() {
-  otpSent.value = false
-  otpCode.value = ''
-  debugCode.value = ''
-  clientError.value = ''
 }
 
 async function handleBusinessLogin() {
@@ -393,6 +324,18 @@ ion-input {
 
 .login-button:hover {
   opacity: 0.9;
+}
+
+.dev-mode-note {
+  display: block;
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.dev-mode-note p {
+  margin: 0;
 }
 
 /* Бизнес логин */

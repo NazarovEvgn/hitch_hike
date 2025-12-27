@@ -9,6 +9,14 @@ import type {
 
 export const authApiService = {
   /**
+   * DEV MODE: Direct login with phone number (no OTP verification)
+   */
+  async devLogin(data: PhoneOTPRequest): Promise<Token> {
+    const response = await apiClient.post<Token>('/auth/dev-login', data)
+    return response.data
+  },
+
+  /**
    * Send OTP code to phone (passwordless login for clients)
    */
   async sendOTP(data: PhoneOTPRequest): Promise<OTPResponse> {
