@@ -139,3 +139,16 @@ ion-card {
   border-radius: 12px;
   overflow: hidden;
 }
+
+/* Ограничение ширины для desktop - мобильный вид */
+@media (min-width: 768px) {
+  ion-app {
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+
+  body {
+    background: #e0e0e0;
+  }
+}

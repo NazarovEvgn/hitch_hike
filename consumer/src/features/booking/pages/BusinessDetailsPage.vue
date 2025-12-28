@@ -1,13 +1,12 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar color="primary">
+      <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-button @click="router.back()">
+          <ion-button @click="router.back()" class="back-button">
             <ion-icon slot="icon-only" :icon="arrowBackOutline"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-title>Выбор услуги</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -224,6 +223,15 @@ onMounted(() => {
 </script>
 
 <style scoped>
+ion-header ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+}
+
+.back-button {
+  --color: var(--ion-color-primary);
+}
+
 ion-content {
   --background: #f5f5f5;
 }

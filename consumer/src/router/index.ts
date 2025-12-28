@@ -47,12 +47,6 @@ const routes: Array<RouteRecordRaw> = [
     name: 'BookingSelectDate',
     component: () => import('@/features/booking/pages/SelectDatePage.vue'),
     meta: { requiresAuth: true }
-  },
-  {
-    path: '/booking/select-time/:businessId/:serviceId/:employeeId',
-    name: 'BookingSelectTime',
-    component: () => import('@/features/booking/pages/SelectTimePage.vue'),
-    meta: { requiresAuth: true }
   }
 ]
 
