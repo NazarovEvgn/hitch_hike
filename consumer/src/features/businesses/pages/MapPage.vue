@@ -426,6 +426,19 @@ function markAllAsRead() {
 .custom-header {
   background: #f5f5f5;
   padding: 12px 16px;
+  box-shadow: none !important;
+}
+
+.custom-header::after {
+  display: none !important;
+}
+
+ion-header {
+  box-shadow: none !important;
+}
+
+ion-header::after {
+  display: none !important;
 }
 
 .header-toolbar {
@@ -434,10 +447,13 @@ function markAllAsRead() {
   --padding-bottom: 8px;
   --padding-start: 12px;
   --padding-end: 12px;
+  --border-width: 0 !important;
+  --box-shadow: none !important;
   margin: 0;
   border-radius: 16px !important;
   overflow: hidden !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: none !important;
+  border: none !important;
 }
 
 .header-toolbar::part(native) {
@@ -543,7 +559,6 @@ function markAllAsRead() {
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .custom-searchbar {
