@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { BookingState, Booking, AvailableSlot } from '../types'
+import { bookingApiService } from '../services/bookingApiService'
+import { useAuthStore } from '@/features/auth/stores/authStore'
 
 export const useBookingStore = defineStore('booking', () => {
   // Booking state
@@ -100,16 +102,31 @@ export const useBookingStore = defineStore('booking', () => {
     error.value = null
 
     try {
-      // TODO: Replace with actual API call
-      console.log('[BookingStore] Submitting booking:', {
+      const authStore = useAuthStore()
+
+      // Get client info from auth store
+      const clientName = authStore.user?.name || 'Клиент'
+      const clientPhone = authStore.user?.phone || ''
+
+      const bookingData = {
         business_id: selectedBusinessId.value,
         service_id: selectedServiceId.value,
         employee_id: selectedEmployeeId.value,
-        date: selectedDate.value,
-        time: selectedTime.value,
-      })
+        booking_date: selectedDate.value,
+        booking_time: selectedTime.value,
+        client_name: clientName,
+        client_phone: clientPhone,
+      }
 
-      // Mock success
+      console.log('[BookingStore] Submitting booking:', bookingData)
+
+      const booking = await bookingApiService.createBooking(bookingData)
+
+      console.log('[BookingStore] Booking created:', booking)
+
+      // Reset booking state after successful creation
+      resetBooking()
+
       return true
     } catch (err: any) {
       error.value = err.response?.data?.detail || 'Failed to create booking'

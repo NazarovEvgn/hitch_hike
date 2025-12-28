@@ -15,9 +15,9 @@ class BookingBase(BaseModel):
 
 
 class BookingCreate(BookingBase):
-    """Booking creation schema for admin."""
+    """Booking creation schema."""
 
-    pass
+    business_id: int
 
 
 class BookingUpdate(BaseModel):

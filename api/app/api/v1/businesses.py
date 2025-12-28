@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, or_, func
+from sqlalchemy.orm import selectinload
 from typing import Optional
 
 from app.core.database import get_db
@@ -254,19 +255,42 @@ async def get_business_services(
     return services
 
 
-@router.get("/{business_id}/employees", response_model=list[EmployeeSchema])
+@router.get("/{business_id}/employees")
 async def get_business_employees(
     business_id: int,
+    service_id: int | None = None,
     db: AsyncSession = Depends(get_db),
 ):
-    """Get all active employees for a business."""
-    result = await db.execute(
-        select(Employee).where(
-            and_(Employee.business_id == business_id, Employee.is_active == True)
-        )
-    )
+    """Get all active employees for a business, optionally filtered by service."""
+    query = select(Employee).where(
+        and_(Employee.business_id == business_id, Employee.is_active == True)
+    ).options(selectinload(Employee.services))
+
+    result = await db.execute(query)
     employees = result.scalars().all()
-    return employees
+
+    # Convert to dict format with service_ids
+    employees_data = []
+    for emp in employees:
+        # Filter by service if specified
+        if service_id:
+            # Check if employee has this service
+            if not any(s.id == service_id for s in emp.services):
+                continue
+
+        employees_data.append({
+            "id": emp.id,
+            "business_id": emp.business_id,
+            "name": emp.name,
+            "phone": emp.phone,
+            "photo_url": emp.photo_url,
+            "is_active": emp.is_active,
+            "created_at": emp.created_at,
+            "updated_at": emp.updated_at,
+            "service_ids": [s.id for s in emp.services],
+        })
+
+    return employees_data
 
 
 @router.get("/{business_id}/promotions", response_model=list[PromotionSchema])

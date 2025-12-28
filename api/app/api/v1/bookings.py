@@ -60,6 +60,7 @@ async def create_booking(
         business_id=booking_data.business_id,
         user_id=current_user.id if current_user else None,
         service_id=booking_data.service_id,
+        employee_id=booking_data.employee_id,
         booking_date=booking_data.booking_date,
         booking_time=booking_data.booking_time,
         client_name=booking_data.client_name,
